@@ -36,3 +36,13 @@
 | App | Settlement |
 | Stack | Capacitor 8 (Android WebView wrapper) |
 | Backend | loads `https://www.kimmiro.com` |
+
+## Pre-release checklist (MANDATORY)
+
+- **Validate `www/index.html` JS syntax before every release.** A single missing `}` silently breaks the *entire* WebView script (no function runs, login included) with no build error. Extract the `<script>` body and run `node --check`, or the app will ship dead:
+  ```sh
+  node -e "const fs=require('fs');const h=fs.readFileSync('www/index.html','utf8');fs.writeFileSync('/tmp/app.js',h.match(/<script>([\s\S]*?)<\/script>/)[1])" && node --check /tmp/app.js
+  ```
+  - History: v1.3.0 dropped `registerPush()`'s closing brace → v1.3.0/v1.4.0 shipped with a fully broken app (users could not log in). Caught only by booting an emulator.
+- **Boot an emulator (or device) and confirm the login screen is interactive** before publishing. `cap sync` + a green gradle build do NOT catch JS syntax errors.
+- Keep `@codetrix-studio/capacitor-google-auth` patched via `bun patchedDependencies` (see `patches/`). The patch makes `refresh()` use `silentSignIn()` for a fresh idToken and builds the client in `load()`.
