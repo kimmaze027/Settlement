@@ -307,11 +307,23 @@ async function googleLogin() {
   try {
     const { GoogleAuth } = Capacitor.Plugins;
     await GoogleAuth.initialize();
-    // Mark in-flight BEFORE leaving the app, so a mid-sign-in process kill is recoverable.
-    await pref.set(PREF_G_INFLIGHT, "1");
-    const result = await GoogleAuth.signIn();
-    await pref.del(PREF_G_INFLIGHT);
-    const idToken = result.authentication?.idToken;
+    // Prefer SILENT sign-in first: refresh() (now backed by silentSignIn()) returns a fresh
+    // idToken with NO UI. This avoids launching the system account-picker Activity, which
+    // backgrounds the app and lets Android kill the process (the #1 cause of login silently
+    // failing). Only when there is no cached consent (first-ever login / cleared data) do we
+    // fall back to the interactive signIn() picker.
+    let idToken = null;
+    try {
+      const silent = await GoogleAuth.refresh();
+      idToken = silent?.idToken || null;
+    } catch {}
+    if (!idToken) {
+      // Mark in-flight BEFORE leaving the app, so a mid-sign-in process kill is recoverable.
+      await pref.set(PREF_G_INFLIGHT, "1");
+      const result = await GoogleAuth.signIn();
+      await pref.del(PREF_G_INFLIGHT);
+      idToken = result.authentication?.idToken;
+    }
     if (!idToken) throw { code: 0, message: "no id_token" };
     await completeGoogleLogin(idToken);
   } catch (e) {
@@ -590,9 +602,11 @@ async function saveName() {
 }
 async function logout() {
   try {
-    // Sign out of the native Google client too, so the account picker shows
-    // again on the next login instead of silently re-using the last account.
-    try { await Capacitor.Plugins.GoogleAuth.signOut(); } catch {}
+    // Do NOT call GoogleAuth.signOut() here. signOut() wipes the cached Google consent,
+    // which would force the next login through the system account-picker Activity again —
+    // and that picker is exactly what triggers the process-death login failure. Keeping the
+    // consent lets the next login complete silently (no picker, no risk). The app session is
+    // still cleared by the server-side logout below.
     await api("/api/auth/logout", { method: "POST" });
   } catch {}
   location.reload();

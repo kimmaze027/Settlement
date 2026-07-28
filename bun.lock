@@ -20,6 +20,9 @@
       },
     },
   },
+  "patchedDependencies": {
+    "@codetrix-studio/capacitor-google-auth@3.4.0-rc.4": "patches/@codetrix-studio%2Fcapacitor-google-auth@3.4.0-rc.4.patch",
+  },
   "packages": {
     "@capacitor/android": ["@capacitor/android@8.4.1", "", { "peerDependencies": { "@capacitor/core": "^8.4.0" } }, "sha512-igtDCJ7QQn0P2qHFD9p4KXaa6V1b2PRNt+MxjVwtjTm/BJvqmiazOJq6rPjwFSZnfHm6iFoZk8TfzHd44pyBGw=="],
 

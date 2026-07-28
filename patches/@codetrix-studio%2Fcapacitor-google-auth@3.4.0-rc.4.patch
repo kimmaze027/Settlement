@@ -1,0 +1,95 @@
+diff --git a/node_modules/@codetrix-studio/capacitor-google-auth/.bun-tag-c020ff84ae6a75df b/.bun-tag-c020ff84ae6a75df
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/android/src/main/java/com/codetrixstudio/capacitor/GoogleAuth/GoogleAuth.java b/android/src/main/java/com/codetrixstudio/capacitor/GoogleAuth/GoogleAuth.java
+index 147fac87c55e9b1d664259ffefa1286f0f8d7d13..de24ae070380408a5b9663a6b1ea0a7f91dfe541 100644
+--- a/android/src/main/java/com/codetrixstudio/capacitor/GoogleAuth/GoogleAuth.java
++++ b/android/src/main/java/com/codetrixstudio/capacitor/GoogleAuth/GoogleAuth.java
+@@ -74,7 +74,22 @@ public class GoogleAuth extends Plugin {
+   }
+ 
+   @Override
+-  public void load() {}
++  public void load() {
++    // Eagerly build the GoogleSignInClient from the Capacitor plugin config so it is
++    // never null — including after Android destroys and recreates this plugin's host
++    // process, which routinely happens while the account-picker Activity is open and the
++    // app is backgrounded. initialize() may still override this with runtime options.
++    String clientId = getConfig().getString("androidClientId",
++      getConfig().getString("clientId",
++        this.getContext().getString(R.string.server_client_id)));
++    boolean forceCodeForRefreshToken = getConfig().getBoolean("forceCodeForRefreshToken", false);
++    String scopesStr = getConfig().getString("scopes", new String());
++    String[] scopeArray = scopesStr
++      .replaceAll("[\"\\[\\] ]", "")
++      .replace("\\", "")
++      .split(",");
++    loadSignInClient(clientId, forceCodeForRefreshToken, scopeArray);
++  }
+ 
+   @PluginMethod()
+   public void signIn(PluginCall call) {
+@@ -134,23 +149,47 @@ public class GoogleAuth extends Plugin {
+ 
+   @PluginMethod()
+   public void refresh(final PluginCall call) {
+-    GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(getContext());
+-    if (account == null) {
+-      call.reject("User not logged in.");
+-    } else {
+-      try {
+-        JSONObject accessTokenObject = getAuthToken(account.getAccount(), true);
+-
+-        JSObject authentication = new JSObject();
+-        authentication.put("idToken", account.getIdToken());
+-        authentication.put(FIELD_ACCESS_TOKEN, accessTokenObject.get(FIELD_ACCESS_TOKEN));
+-        authentication.put("refreshToken", "");
+-        call.resolve(authentication);
+-      } catch(Exception e){
+-        e.printStackTrace();
+-        call.reject("Something went wrong while retrieving access token", e);
+-      }
++    if (googleSignInClient == null) {
++      call.reject("GoogleSignInClient not initialized.");
++      return;
+     }
++    // silentSignIn() returns a FRESH GoogleSignInAccount (with a fresh, unexpired idToken)
++    // WITHOUT showing any UI, as long as the user previously granted consent. This is what
++    // makes recovery reliable: getLastSignedInAccount() only ever returns a cached account
++    // whose idToken expires after ~1 hour and is null after signOut(), so the old impl kept
++    // handing the server a stale/empty token that it rejected.
++    googleSignInClient.silentSignIn()
++      .addOnSuccessListener(getActivity(), new OnSuccessListener<GoogleSignInAccount>() {
++        @Override
++        public void onSuccess(GoogleSignInAccount account) {
++          // getAuthToken() performs a blocking network call, so run it off the main thread
++          // (the GMS Task success listener runs on the main thread by default).
++          ExecutorService executor = Executors.newSingleThreadExecutor();
++          executor.execute(() -> {
++            String accessToken = null;
++            try {
++              JSONObject accessTokenObject = getAuthToken(account.getAccount(), true);
++              accessToken = accessTokenObject.getString(FIELD_ACCESS_TOKEN);
++            } catch (Exception e) {
++              // The server only needs the idToken; an accessToken failure must not break login.
++              e.printStackTrace();
++            }
++            JSObject authentication = new JSObject();
++            authentication.put("idToken", account.getIdToken());
++            if (accessToken != null) {
++              authentication.put(FIELD_ACCESS_TOKEN, accessToken);
++            }
++            authentication.put("refreshToken", "");
++            call.resolve(authentication);
++          });
++        }
++      })
++      .addOnFailureListener(getActivity(), new OnFailureListener() {
++        @Override
++        public void onFailure(Exception e) {
++          call.reject("User not logged in.", e);
++        }
++      });
+   }
+ 
+   @PluginMethod()
