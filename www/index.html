@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>Settlement</title>
 <style>
-/* ===== Design tokens ===== */
+/* ===== Design tokens (4px-base spacing scale; all paddings/margins/gaps use it) ===== */
 :root{
   --bg:#0C0C0C;
   --surface:#141414;
@@ -18,8 +18,8 @@
   --accent:#10b981;
   --accent-2:#34d399;
   --danger:#f87171;
-  --s-1:4px; --s-2:8px; --s-3:12px; --s-4:16px; --s-5:20px; --s-6:24px; --s-8:32px;
-  --r-sm:8px; --r-md:12px;
+  --s-1:4px; --s-2:8px; --s-3:12px; --s-4:16px; --s-5:20px; --s-6:24px; --s-7:28px; --s-8:32px;
+  --r-sm:8px; --r-md:12px; --r-pill:999px;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%}
@@ -70,49 +70,55 @@ a{color:var(--accent-2);text-decoration:none}
 .details{margin-top:var(--s-3);padding-top:var(--s-3);border-top:1px solid var(--line)}
 
 /* ===== Inputs ===== */
-.input{width:100%;padding:11px 13px;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-sm);color:var(--txt);outline:none;transition:border-color .15s}
+.input{width:100%;padding:var(--s-3) var(--s-4);background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-sm);color:var(--txt);outline:none;transition:border-color .15s}
 .input::placeholder{color:rgba(255,255,255,.32)}
 .input:focus{border-color:var(--accent)}
 .field{margin-bottom:var(--s-3)}
 
 /* ===== Buttons ===== */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 18px;border:1px solid var(--line-strong);background:transparent;color:var(--txt);border-radius:var(--r-md);font-weight:500;cursor:pointer;white-space:nowrap;transition:background .15s,border-color .15s,opacity .15s}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--s-1);padding:var(--s-3) var(--s-5);border:1px solid var(--line-strong);background:transparent;color:var(--txt);border-radius:var(--r-md);font-weight:500;cursor:pointer;white-space:nowrap;transition:background .15s,border-color .15s,opacity .15s}
 .btn:hover{background:rgba(255,255,255,.06)}
 .btn:active{transform:translateY(.5px)}
 .btn:disabled{opacity:.4;cursor:not-allowed}
 .btn-primary{background:var(--accent);border-color:var(--accent);color:#0C0C0C;font-weight:600}
 .btn-primary:hover{background:var(--accent-2);border-color:var(--accent-2)}
-.btn-sm{padding:7px 13px;font-size:12px;border-radius:var(--r-sm)}
+.btn-sm{padding:var(--s-2) var(--s-3);font-size:12px;border-radius:var(--r-sm)}
 .btn-block{display:flex;width:100%}
 .btn.neg{color:var(--danger)}
 
-/* ===== Badge ===== */
-.badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;background:rgba(255,255,255,.1);color:var(--txt-mute)}
+/* ===== Badge / chip ===== */
+.badge{display:inline-block;padding:2px var(--s-2);border-radius:var(--r-pill);font-size:11px;background:rgba(255,255,255,.1);color:var(--txt-mute)}
+.deposit-pick{margin:0 var(--s-1) var(--s-1) 0;padding:var(--s-2) var(--s-3);border:1px solid var(--line);background:transparent;color:var(--txt-mute);border-radius:var(--r-pill);font-size:12px;font-weight:500;cursor:pointer;transition:background .15s,border-color .15s,color .15s}
+.deposit-pick.on{border-color:rgba(16,185,129,.4);color:var(--accent-2);background:rgba(16,185,129,.15)}
 
 /* ===== Messages ===== */
 .err{color:var(--danger);font-size:12px;padding:var(--s-1) 0}
 .ok{color:var(--accent-2);font-size:12px;padding:var(--s-1) 0}
+.list-empty{padding:var(--s-3) 0;color:var(--txt-faint);font-size:12px}
 
 /* ===== Checkboxes ===== */
-label.cb{display:flex;align-items:center;gap:var(--s-2);cursor:pointer;padding:7px 0}
+label.cb{display:flex;align-items:center;gap:var(--s-2);cursor:pointer;padding:var(--s-2) 0}
 label.cb input{width:20px;height:20px;accent-color:var(--accent)}
 
 /* ===== Bottom nav ===== */
 .nav{position:fixed;bottom:0;left:0;right:0;max-width:500px;margin:0 auto;background:rgba(12,12,12,.96);backdrop-filter:blur(8px);border-top:1px solid var(--line);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
-.nav button{flex:1;background:none;border:none;color:var(--txt-faint);padding:14px 0;font-size:12px;font-weight:500;cursor:pointer}
+.nav button{flex:1;background:none;border:none;color:var(--txt-faint);padding:var(--s-4) 0;font-size:12px;font-weight:500;cursor:pointer}
 .nav button.active{color:var(--accent-2);font-weight:600}
 .nav button:active{opacity:.7}
 
 /* ===== Push toast ===== */
-.push-toast{position:fixed;top:0;left:0;right:0;max-width:500px;margin:0 auto;background:var(--accent);color:#0C0C0C;padding:12px 16px;font-size:13px;font-weight:600;z-index:999;cursor:pointer}
+.push-toast{position:fixed;top:0;left:0;right:0;max-width:500px;margin:0 auto;background:var(--accent);color:#0C0C0C;padding:var(--s-3) var(--s-4);font-size:13px;font-weight:600;z-index:999;cursor:pointer}
+
 /* ===== Update modal (self-update) ===== */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;padding:var(--s-4);z-index:1000}
 .modal-card{background:var(--surface);border:1px solid var(--line-strong);border-radius:var(--r-md);padding:var(--s-5);width:100%;max-width:340px;display:flex;flex-direction:column;gap:var(--s-2)}
+.modal-wide{max-width:420px}
 .upd-ver{font-size:18px;font-weight:600;color:var(--accent-2)}
 .upd-vers{display:flex;flex-direction:column;gap:var(--s-2);margin:var(--s-1) 0}
 .upd-progress{display:flex;flex-direction:column;gap:var(--s-1);margin-top:var(--s-1)}
-.upd-bar{height:6px;background:var(--surface-2);border-radius:999px;overflow:hidden}
-.upd-fill{height:100%;width:0;background:var(--accent);border-radius:999px;transition:width .2s}
+.upd-bar{height:6px;background:var(--surface-2);border-radius:var(--r-pill);overflow:hidden}
+.upd-fill{height:100%;width:0;background:var(--accent);border-radius:var(--r-pill);transition:width .2s}
+
 /* ===== App lock (PIN keypad) ===== */
 .pin-dots{display:flex;gap:var(--s-3);justify-content:center;margin:var(--s-5) 0 var(--s-4)}
 .pin-dots .dot{width:14px;height:14px;border-radius:50%;border:1px solid var(--line-strong);transition:background .1s,border-color .1s}
@@ -122,7 +128,7 @@ label.cb input{width:20px;height:20px;accent-color:var(--accent)}
 .keypad .key:active{background:rgba(255,255,255,.12)}
 .keypad .key.key-blank{border:none;background:none;cursor:default}
 .actions-center{display:flex;gap:var(--s-2);justify-content:center;flex-wrap:wrap}
-.lock-link{background:none;border:none;color:var(--txt-faint);font-size:12px;cursor:pointer;padding:6px 8px;text-decoration:underline}
+.lock-link{background:none;border:none;color:var(--txt-faint);font-size:12px;cursor:pointer;padding:var(--s-2);text-decoration:underline}
 </style>
 </head>
 <body>
@@ -183,15 +189,15 @@ label.cb input{width:20px;height:20px;accent-color:var(--accent)}
     <!-- SETTLEMENT -->
     <div class="section-head">
       <h2 class="h2">정산</h2>
-      <div class="row" style="gap:8px">
+      <div class="row">
         <button class="btn btn-sm" id="btn-deposit" onclick="openDeposit()" style="display:none">입금 확인</button>
         <button class="btn btn-sm" onclick="toggleSettlementForm()">+ 정산 요청</button>
       </div>
     </div>
     <!-- deposit modal -->
-    <div id="deposit-modal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:1000;padding:16px" onclick="closeDeposit()">
-      <div class="card stack" style="max-width:400px;width:100%" onclick="event.stopPropagation()">
-        <div class="row" style="justify-content:space-between"><span class="stl-title">입금 확인</span><span class="sub" style="cursor:pointer" onclick="closeDeposit()">✕</span></div>
+    <div id="deposit-modal" class="hidden overlay" onclick="closeDeposit()">
+      <div class="modal-card stack modal-wide" onclick="event.stopPropagation()">
+        <div class="row"><span class="stl-title">입금 확인</span><span class="sub" onclick="closeDeposit()">✕</span></div>
         <div id="deposit-debtors"></div>
         <span class="sub" id="deposit-hint" style="display:none"></span>
         <input id="deposit-amount" class="input" placeholder="받은 금액 (원)" inputmode="numeric" oninput="this.value=this.value.replace(/[^\d]/g,'').replace(/\B(?=(\d{3})+(?!\d))/g,',')">
@@ -646,7 +652,7 @@ async function loadGroups() {
     const r = await api("/api/groups");
     const d = await r.json();
     const el = document.getElementById("group-list");
-    if (!d.groups || !d.groups.length) { el.innerHTML = '<p class="sub" style="padding:12px">그룹이 없습니다.</p>'; return; }
+    if (!d.groups || !d.groups.length) { el.innerHTML = '<p class="list-empty">그룹이 없습니다.</p>'; return; }
     el.innerHTML = d.groups.map(g => `<div class="card clickable" onclick="openGroup(${g.id})"><div class="row"><span class="stl-title">${esc(g.name)}</span><span class="badge">${g.owner_id === myId ? "운영자" : "멤버"}</span></div></div>`).join("");
   } catch {}
 }
@@ -696,7 +702,7 @@ async function loadSettlements() {
     det.innerHTML = h;
     // list
     const ll = document.getElementById("stl-list");
-    if (!l.settlements?.length) { ll.innerHTML = '<p class="sub" style="padding:8px 0">정산 요청이 없습니다.</p>'; return; }
+    if (!l.settlements?.length) { ll.innerHTML = '<p class="list-empty">정산 요청이 없습니다.</p>'; return; }
     ll.innerHTML = l.settlements.map(s => {
       const mine = s.requester_user_id === myId;
       return `<div class="card stack">
@@ -795,7 +801,7 @@ async function openDeposit() {
   depositSelectedUid = debtors[0].user_id;
   const dd = document.getElementById("deposit-debtors");
   dd.innerHTML = '<span class="sub">받은 사람</span>' +
-    debtors.map(d => `<button class="btn btn-sm deposit-pick" data-uid="${d.user_id}" onclick="pickDebtor(${d.user_id})" style="margin:4px 4px 4px 0">${esc(d.username)} (${won(d.amount)})</button>`).join("");
+    debtors.map(d => `<button class="deposit-pick" data-uid="${d.user_id}" onclick="pickDebtor(${d.user_id})">${esc(d.username)} (${won(d.amount)})</button>`).join("");
   pickDebtor(depositSelectedUid);
   document.getElementById("deposit-amount").value = "";
   document.getElementById("deposit-err").innerHTML = "";
@@ -805,9 +811,7 @@ function pickDebtor(uid) {
   depositSelectedUid = uid;
   document.querySelectorAll(".deposit-pick").forEach(b => {
     const on = parseInt(b.dataset.uid) === uid;
-    b.style.cssText = on
-      ? "margin:4px 4px 4px 0;border:1px solid rgba(16,185,129,.4);color:#34d399;background:rgba(16,185,129,.15)"
-      : "margin:4px 4px 4px 0;border:1px solid var(--line);color:var(--txt-mute)";
+    b.classList.toggle("on", on);
   });
   const hint = document.getElementById("deposit-hint");
   const res = document.querySelector(`.deposit-pick[data-uid="${uid}"]`);
