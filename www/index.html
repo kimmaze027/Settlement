@@ -537,12 +537,19 @@ async function lockBiometric() {
     enterApp();
   } catch { /* canceled / failed -> stay on PIN entry */ }
 }
-async function lockReset() {
-  // Full reset: clears the server session AND the local lock. Used for account
-  // switch or forgotten-PIN recovery (PIN is re-enrolled after the next login).
-  if (!confirm("로그아웃하고 PIN을 초기화할까요?")) return;
+// Wipes everything so the next login is from scratch: clears the Google consent (so the
+// account picker shows again instead of a silent auto-login), the server session, and the
+// local PIN/biometric lock.
+async function fullLogout() {
+  try { const { GoogleAuth } = Capacitor.Plugins; if (GoogleAuth) await GoogleAuth.signOut(); } catch {}
   try { await api("/api/auth/logout", { method: "POST" }); } catch {}
   try { await pref.del("pin_hash"); await pref.del("biometric_enabled"); } catch {}
+}
+async function lockReset() {
+  // Full reset: Google consent + server session + local lock. Used for account switch or
+  // forgotten-PIN recovery; the next login re-enrolls PIN from scratch.
+  if (!confirm("로그아웃하고 PIN을 초기화할까요?")) return;
+  await fullLogout();
   showScreen("login");
 }
 
@@ -834,14 +841,11 @@ async function saveName() {
   } catch (err) { m.innerHTML = `<p class="err">${err.status === 409 ? "이미 사용 중" : "실패"}</p>`; }
 }
 async function logout() {
-  try {
-    // Do NOT call GoogleAuth.signOut() here. signOut() wipes the cached Google consent,
-    // which would force the next login through the system account-picker Activity again —
-    // and that picker is exactly what triggers the process-death login failure. Keeping the
-    // consent lets the next login complete silently (no picker, no risk). The app session is
-    // still cleared by the server-side logout below.
-    await api("/api/auth/logout", { method: "POST" });
-  } catch {}
+  // Full reset on logout: clearing the Google consent forces the account picker next
+  // time (not a silent auto-login), and clearing PIN/biometric re-enrolls the lock from
+  // scratch on the next login. The picker's process-death risk is covered by
+  // recoverGoogleLogin() on relaunch.
+  await fullLogout();
   location.reload();
 }
 
