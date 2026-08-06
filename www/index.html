@@ -244,7 +244,7 @@ label.cb input{width:20px;height:20px;accent-color:var(--accent)}
   </div>
 
   <!-- MYPAGE -->
-  <div id="view-mypage" class="page-pad">
+  <div id="view-mypage" class="hidden page-pad">
     <h1 class="h1 mt4">내 정보</h1>
     <div class="card stack">
       <div class="row">
@@ -445,7 +445,9 @@ function showScreen(name) {
 }
 function enterApp() {
   showScreen("main");
-  loadGroups();
+  // Deterministic entry state: show the groups view with its tab active (this also
+  // loads groups). Without it the default markup could leave several views stacked.
+  showView("groups");
   registerPush();
   syncLockSettings();
 }
