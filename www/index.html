@@ -253,6 +253,16 @@ label.cb input{width:20px;height:20px;accent-color:var(--accent)}
         <div id="name-msg"></div>
       </div>
     </div>
+    <div class="card stack">
+      <div class="row" id="bio-row">
+        <span class="stl-title">생체인증</span>
+        <label class="cb" style="padding:0"><input type="checkbox" id="bio-toggle" onchange="toggleBio()"> 사용</label>
+      </div>
+      <div class="row">
+        <span class="stl-title">PIN 번호</span>
+        <button class="btn btn-sm" onclick="changePin()">변경</button>
+      </div>
+    </div>
     <button class="btn btn-block mt4" onclick="logout()">로그아웃</button>
   </div>
 
@@ -414,7 +424,7 @@ async function init() {
 // owner is present. PIN (SHA-256 hashed, stored in Preferences) is always available;
 // biometric (BiometricPrompt) is an optional convenience that auto-prompts if enabled.
 const PIN_LEN = 4;
-let lockCtrl = null, pinSetupCtrl = null, pinSetupFirst = null;
+let lockCtrl = null, pinSetupCtrl = null, pinSetupFirst = null, pinSetupMode = "enroll";
 
 function showScreen(name) {
   ["login", "lock", "pinsetup", "main"].forEach(s => document.getElementById("screen-" + s).classList.add("hidden"));
@@ -424,6 +434,48 @@ function enterApp() {
   showScreen("main");
   loadGroups();
   registerPush();
+  syncLockSettings();
+}
+function toast(msg) {
+  const t = document.createElement("div");
+  t.className = "push-toast";
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+// Enable biometric only after a successful in-app fingerprint check; persists the
+// flag on success and clears it on any failure/cancel. Used at PIN enrollment and
+// from the My Info toggle.
+async function tryEnableBiometric() {
+  try {
+    await Capacitor.Plugins.Biometric.authenticate({ title: "Settlement", subtitle: "지문 인증" });
+    await pref.set("biometric_enabled", "1");
+    return true;
+  } catch {
+    await pref.set("biometric_enabled", "0");
+    return false;
+  }
+}
+// Reflect current biometric availability/enabled state into the My Info toggle.
+async function syncLockSettings() {
+  const avail = await bioAvailable();
+  const row = document.getElementById("bio-row");
+  if (row) row.style.display = avail ? "" : "none";
+  if (avail) document.getElementById("bio-toggle").checked = (await pref.get("biometric_enabled")) === "1";
+}
+async function toggleBio() {
+  const cb = document.getElementById("bio-toggle");
+  const enabled = (await pref.get("biometric_enabled")) === "1";
+  if (cb.checked && !enabled) {
+    const ok = await tryEnableBiometric();
+    cb.checked = ok;
+    if (!ok) toast("지문 인증 실패 — 생체인증을 켜지 못했습니다");
+  } else if (!cb.checked && enabled) {
+    await pref.set("biometric_enabled", "0");
+  }
+}
+function changePin() {
+  showPinSetup("change");
 }
 
 async function pinHash(pin) {
@@ -494,15 +546,20 @@ async function lockReset() {
   showScreen("login");
 }
 
-async function showPinSetup() {
+async function showPinSetup(mode) {
+  pinSetupMode = mode || "enroll";
   showScreen("pinsetup");
   pinSetupFirst = null;
-  document.getElementById("pinsetup-msg").textContent = "PIN을 설정하세요 (4자리)";
+  document.getElementById("pinsetup-msg").textContent = pinSetupMode === "change" ? "새 PIN을 입력하세요 (4자리)" : "PIN을 설정하세요 (4자리)";
   document.getElementById("pinsetup-err").textContent = "";
-  const avail = await bioAvailable();
   const wrap = document.getElementById("pinsetup-bio-wrap");
-  wrap.style.display = avail ? "flex" : "none";
-  document.getElementById("pinsetup-bio").checked = avail;
+  if (pinSetupMode === "change") {
+    wrap.style.display = "none";
+  } else {
+    const avail = await bioAvailable();
+    wrap.style.display = avail ? "flex" : "none";
+    document.getElementById("pinsetup-bio").checked = avail;
+  }
   pinSetupCtrl = makePinInput("pinsetup-dots", "pinsetup-keypad", onPinSetup);
 }
 async function onPinSetup(pin) {
@@ -515,9 +572,21 @@ async function onPinSetup(pin) {
     if (pinSetupCtrl) pinSetupCtrl.reset();
   } else if (pin === pinSetupFirst) {
     await pref.set("pin_hash", await pinHash(pin));
-    await pref.set("biometric_enabled", document.getElementById("pinsetup-bio").checked ? "1" : "0");
     pinSetupFirst = null;
-    enterApp();
+    if (pinSetupMode === "enroll") {
+      // If the user opted into biometric, verify it works once before relying on it;
+      // on any failure the biometric option stays OFF (PIN remains the gate).
+      if (document.getElementById("pinsetup-bio").checked && await bioAvailable()) {
+        if (!(await tryEnableBiometric())) toast("지문 인증 실패 — 생체인증이 꺼졌습니다");
+      } else {
+        await pref.set("biometric_enabled", "0");
+      }
+      enterApp();
+    } else {
+      toast("PIN이 변경되었습니다");
+      showScreen("main");
+      showView("mypage");
+    }
   } else {
     err.textContent = "PIN이 일치하지 않습니다. 다시 설정하세요.";
     pinSetupFirst = null;
@@ -783,6 +852,7 @@ function showView(v) {
   document.querySelectorAll(".nav button").forEach(b => b.classList.remove("active"));
   document.getElementById("tab-" + (v === "detail" ? "groups" : v)).classList.add("active");
   if (v === "groups") loadGroups();
+  if (v === "mypage") syncLockSettings();
 }
 
 // --- APP UPDATE (GitHub Releases sideload distribution) ---
