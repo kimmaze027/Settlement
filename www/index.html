@@ -688,20 +688,8 @@ async function checkForUpdate() {
     const r = await fetch("https://api.github.com/repos/" + GH_REPO + "/releases/latest", { cache: "no-store" });
     if (!r.ok) return;
     const d = await r.json();
-    try { await pref.set("upd_lastcheck", String(Date.now())); } catch {}
     if (cmpVer(d.tag_name || "", appVersion) > 0) openUpdateModal(d.tag_name || "");
   } catch {}
-}
-
-// Automatic check is throttled to once per 6h so repeated app opens don't hammer the
-// unauthenticated GitHub API (60 req/hour/IP). The timestamp is only written on a
-// successful response, so an offline launch still retries next time.
-async function maybeAutoCheck() {
-  try {
-    const last = await pref.get("upd_lastcheck");
-    if (last && Date.now() - parseInt(last) < 6 * 3600 * 1000) return;
-  } catch {}
-  checkForUpdate();
 }
 
 function openUpdateModal(tag) {
@@ -751,12 +739,13 @@ async function exitApp() {
 
 // --- START ---
 (async () => {
+  // Check for a newer release immediately, independent of login state, so the forced
+  // update dialog appears right on the login screen. Non-blocking.
+  checkForUpdate();
   // If a previous Google login was interrupted by the OS killing the app while the
   // account picker was open, finish it silently before showing the login screen.
   const recovered = await recoverGoogleLogin();
   if (!recovered) await init();
-  // Non-blocking: prompt to self-update when a newer GitHub release exists.
-  maybeAutoCheck();
 })();
 </script>
 </body>
