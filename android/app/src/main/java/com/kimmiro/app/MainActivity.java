@@ -9,6 +9,7 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         // Local (app-module) plugins are not auto-registered; register before super.onCreate().
         registerPlugin(UpdaterPlugin.class);
+        registerPlugin(BiometricPlugin.class);
         super.onCreate(savedInstanceState);
     }
 }

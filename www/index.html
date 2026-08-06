@@ -113,6 +113,16 @@ label.cb input{width:20px;height:20px;accent-color:var(--accent)}
 .upd-progress{display:flex;flex-direction:column;gap:var(--s-1);margin-top:var(--s-1)}
 .upd-bar{height:6px;background:var(--surface-2);border-radius:999px;overflow:hidden}
 .upd-fill{height:100%;width:0;background:var(--accent);border-radius:999px;transition:width .2s}
+/* ===== App lock (PIN keypad) ===== */
+.pin-dots{display:flex;gap:var(--s-3);justify-content:center;margin:var(--s-5) 0 var(--s-4)}
+.pin-dots .dot{width:14px;height:14px;border-radius:50%;border:1px solid var(--line-strong);transition:background .1s,border-color .1s}
+.pin-dots .dot.on{background:var(--accent);border-color:var(--accent)}
+.keypad{display:grid;grid-template-columns:repeat(3,64px);gap:var(--s-3);justify-content:center;margin-top:var(--s-4)}
+.keypad .key{width:64px;height:64px;border-radius:50%;border:1px solid var(--line-strong);background:var(--surface-2);color:var(--txt);font-size:24px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .1s}
+.keypad .key:active{background:rgba(255,255,255,.12)}
+.keypad .key.key-blank{border:none;background:none;cursor:default}
+.actions-center{display:flex;gap:var(--s-2);justify-content:center;flex-wrap:wrap}
+.lock-link{background:none;border:none;color:var(--txt-faint);font-size:12px;cursor:pointer;padding:6px 8px;text-decoration:underline}
 </style>
 </head>
 <body>
@@ -122,6 +132,29 @@ label.cb input{width:20px;height:20px;accent-color:var(--accent)}
   <h1 class="brand center">Settlement</h1>
   <button id="google-btn" class="btn btn-primary btn-block mt4" onclick="googleLogin()">Google 로그인</button>
   <div id="google-err" class="err center mt2"></div>
+</div>
+
+<!-- LOCK SCREEN (biometric/PIN re-entry gate) -->
+<div id="screen-lock" class="screen-center hidden">
+  <h1 class="brand center">Settlement</h1>
+  <p id="lock-msg" class="sub center mt2">PIN을 입력하세요</p>
+  <div id="lock-dots" class="pin-dots"></div>
+  <div id="lock-keypad" class="keypad"></div>
+  <div class="actions-center mt3">
+    <button id="lock-bio" class="btn btn-sm" onclick="lockBiometric()">지문 인증</button>
+  </div>
+  <button class="lock-link mt2" onclick="lockReset()">다른 계정으로 로그인</button>
+  <div id="lock-err" class="err center mt2"></div>
+</div>
+
+<!-- PIN SETUP SCREEN (first-time enrollment) -->
+<div id="screen-pinsetup" class="screen-center hidden">
+  <h1 class="brand center">Settlement</h1>
+  <p id="pinsetup-msg" class="sub center mt2">PIN을 설정하세요 (4자리)</p>
+  <div id="pinsetup-dots" class="pin-dots"></div>
+  <div id="pinsetup-keypad" class="keypad"></div>
+  <label class="cb mt3" id="pinsetup-bio-wrap" style="justify-content:center"><input type="checkbox" id="pinsetup-bio"> 지문 인증 사용</label>
+  <div id="pinsetup-err" class="err center mt2"></div>
 </div>
 
 <!-- MAIN APP -->
@@ -351,6 +384,8 @@ async function googleLogin() {
 }
 
 // --- INIT ---
+// After confirming a valid server session, entry is gated behind the local app lock
+// (PIN, optional biometric) — NOT silent auto-login. First login forces PIN enrollment.
 async function init() {
   try {
     const r = await api("/api/auth/me");
@@ -364,11 +399,131 @@ async function init() {
     }
     myId = d.id;
     document.getElementById("my-name").textContent = d.username;
-    document.getElementById("screen-login").classList.add("hidden");
-    document.getElementById("screen-main").classList.remove("hidden");
-    await loadGroups();
-    registerPush();
-  } catch { /* not logged in */ }
+    // Valid session: require a PIN (enroll on first login), then gate every reopen.
+    const hash = await pref.get("pin_hash");
+    if (!hash) showPinSetup();
+    else showLock();
+  } catch {
+    // No valid session -> show the Google-only login screen.
+    showScreen("login");
+  }
+}
+
+// --- APP LOCK (biometric / PIN re-entry gate) ---
+// The server session cookie proves the account; this local gate proves the device
+// owner is present. PIN (SHA-256 hashed, stored in Preferences) is always available;
+// biometric (BiometricPrompt) is an optional convenience that auto-prompts if enabled.
+const PIN_LEN = 4;
+let lockCtrl = null, pinSetupCtrl = null, pinSetupFirst = null;
+
+function showScreen(name) {
+  ["login", "lock", "pinsetup", "main"].forEach(s => document.getElementById("screen-" + s).classList.add("hidden"));
+  document.getElementById("screen-" + name).classList.remove("hidden");
+}
+function enterApp() {
+  showScreen("main");
+  loadGroups();
+  registerPush();
+}
+
+async function pinHash(pin) {
+  const data = new TextEncoder().encode("settlement-pin-v1:" + pin);
+  const buf = await crypto.subtle.digest("SHA-256", data);
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
+}
+async function bioAvailable() {
+  try {
+    const B = Capacitor.Plugins.Biometric;
+    if (!B) return false;
+    return !!(await B.isAvailable()).available;
+  } catch { return false; }
+}
+
+// Renders a numeric keypad + PIN dots; calls onComplete(pin) when PIN_LEN digits entered.
+function makePinInput(dotsId, keypadId, onComplete) {
+  let entry = "";
+  const dots = document.getElementById(dotsId);
+  const kp = document.getElementById(keypadId);
+  function render() {
+    dots.innerHTML = Array.from({ length: PIN_LEN }, (_, i) => '<span class="dot ' + (i < entry.length ? "on" : "") + '"></span>').join("");
+  }
+  const keys = ["1","2","3","4","5","6","7","8","9","","0","del"];
+  kp.innerHTML = keys.map(k => k === "" ? '<button class="key key-blank" disabled></button>'
+    : '<button class="key" data-k="' + k + '">' + (k === "del" ? "⌫" : k) + "</button>").join("");
+  kp.querySelectorAll(".key[data-k]").forEach(b => b.addEventListener("click", () => {
+    const k = b.dataset.k;
+    if (k === "del") entry = entry.slice(0, -1);
+    else if (entry.length < PIN_LEN) entry += k;
+    render();
+    if (entry.length === PIN_LEN) { const p = entry; entry = ""; render(); onComplete(p); }
+  }));
+  render();
+  return { reset: () => { entry = ""; render(); } };
+}
+
+async function showLock() {
+  showScreen("lock");
+  document.getElementById("lock-err").textContent = "";
+  document.getElementById("lock-msg").textContent = "PIN을 입력하세요";
+  lockCtrl = makePinInput("lock-dots", "lock-keypad", onLockPin);
+  const avail = await bioAvailable();
+  const enabled = (await pref.get("biometric_enabled")) === "1";
+  document.getElementById("lock-bio").style.display = avail ? "" : "none";
+  if (avail && enabled) lockBiometric(); // auto-prompt when enabled
+}
+async function onLockPin(pin) {
+  if ((await pinHash(pin)) === (await pref.get("pin_hash"))) {
+    enterApp();
+  } else {
+    document.getElementById("lock-err").textContent = "PIN이 틀렸습니다";
+    if (lockCtrl) lockCtrl.reset();
+  }
+}
+async function lockBiometric() {
+  try {
+    await Capacitor.Plugins.Biometric.authenticate({ title: "Settlement", subtitle: "잠금 해제" });
+    enterApp();
+  } catch { /* canceled / failed -> stay on PIN entry */ }
+}
+async function lockReset() {
+  // Full reset: clears the server session AND the local lock. Used for account
+  // switch or forgotten-PIN recovery (PIN is re-enrolled after the next login).
+  if (!confirm("로그아웃하고 PIN을 초기화할까요?")) return;
+  try { await api("/api/auth/logout", { method: "POST" }); } catch {}
+  try { await pref.del("pin_hash"); await pref.del("biometric_enabled"); } catch {}
+  showScreen("login");
+}
+
+async function showPinSetup() {
+  showScreen("pinsetup");
+  pinSetupFirst = null;
+  document.getElementById("pinsetup-msg").textContent = "PIN을 설정하세요 (4자리)";
+  document.getElementById("pinsetup-err").textContent = "";
+  const avail = await bioAvailable();
+  const wrap = document.getElementById("pinsetup-bio-wrap");
+  wrap.style.display = avail ? "flex" : "none";
+  document.getElementById("pinsetup-bio").checked = avail;
+  pinSetupCtrl = makePinInput("pinsetup-dots", "pinsetup-keypad", onPinSetup);
+}
+async function onPinSetup(pin) {
+  const msg = document.getElementById("pinsetup-msg");
+  const err = document.getElementById("pinsetup-err");
+  if (!pinSetupFirst) {
+    pinSetupFirst = pin;
+    msg.textContent = "다시 한번 입력하세요";
+    err.textContent = "";
+    if (pinSetupCtrl) pinSetupCtrl.reset();
+  } else if (pin === pinSetupFirst) {
+    await pref.set("pin_hash", await pinHash(pin));
+    await pref.set("biometric_enabled", document.getElementById("pinsetup-bio").checked ? "1" : "0");
+    pinSetupFirst = null;
+    enterApp();
+  } else {
+    err.textContent = "PIN이 일치하지 않습니다. 다시 설정하세요.";
+    pinSetupFirst = null;
+    msg.textContent = "PIN을 설정하세요 (4자리)";
+    if (pinSetupCtrl) pinSetupCtrl.reset();
+  }
 }
 
 // --- PUSH NOTIFICATIONS ---
