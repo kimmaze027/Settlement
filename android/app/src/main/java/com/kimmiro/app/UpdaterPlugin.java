@@ -48,6 +48,14 @@ public class UpdaterPlugin extends Plugin {
         }
         call.resolve(ret);
     }
+
+    @PluginMethod
+    public void exitApp(PluginCall call) {
+        // finishAffinity() closes all activities in the task, returning the user to the
+        // home screen. Used by the "exit app" button on the forced update dialog.
+        getActivity().finishAffinity();
+        call.resolve();
+    }
     @PluginMethod
     public void downloadAndInstall(PluginCall call) {
         final String url = call.getString("url");

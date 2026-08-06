@@ -109,7 +109,7 @@ label.cb input{width:20px;height:20px;accent-color:var(--accent)}
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;padding:var(--s-4);z-index:1000}
 .modal-card{background:var(--surface);border:1px solid var(--line-strong);border-radius:var(--r-md);padding:var(--s-5);width:100%;max-width:340px;display:flex;flex-direction:column;gap:var(--s-2)}
 .upd-ver{font-size:18px;font-weight:600;color:var(--accent-2)}
-.upd-notes{font-size:12px;color:var(--txt-mute);white-space:pre-wrap;max-height:160px;overflow:auto;line-height:1.5;margin:0}
+.upd-vers{display:flex;flex-direction:column;gap:var(--s-2);margin:var(--s-1) 0}
 .upd-progress{display:flex;flex-direction:column;gap:var(--s-1);margin-top:var(--s-1)}
 .upd-bar{height:6px;background:var(--surface-2);border-radius:999px;overflow:hidden}
 .upd-fill{height:100%;width:0;background:var(--accent);border-radius:999px;transition:width .2s}
@@ -224,13 +224,6 @@ label.cb input{width:20px;height:20px;accent-color:var(--accent)}
         <div id="name-msg"></div>
       </div>
     </div>
-    <div class="card stack-sm mt4">
-      <div class="row">
-        <div class="stack-sm"><span class="sub">앱 버전</span><span class="name-val" id="app-ver">-</span></div>
-        <button class="btn btn-sm" onclick="checkForUpdate({manual:true})">업데이트 확인</button>
-      </div>
-      <div id="upd-msg"></div>
-    </div>
     <button class="btn btn-block mt4" onclick="logout()">로그아웃</button>
   </div>
 
@@ -244,14 +237,16 @@ label.cb input{width:20px;height:20px;accent-color:var(--accent)}
 <div id="upd-modal" class="hidden overlay">
   <div class="modal-card">
     <h2 class="h2 center">새 버전이 있습니다</h2>
-    <p class="center"><span id="upd-ver" class="upd-ver"></span></p>
-    <p id="upd-notes" class="upd-notes"></p>
+    <div class="upd-vers">
+      <div class="row"><span class="sub">현재 버전</span><span id="upd-cur" class="name-val"></span></div>
+      <div class="row"><span class="sub">최신 버전</span><span id="upd-ver" class="upd-ver"></span></div>
+    </div>
     <div id="upd-progress" class="upd-progress hidden">
       <div class="upd-bar"><div id="upd-pct" class="upd-fill"></div></div>
       <span id="upd-pct-text" class="sub center"></span>
     </div>
     <button id="upd-btn" class="btn btn-primary btn-block" onclick="startUpdate()">업데이트</button>
-    <button class="btn btn-sm" onclick="closeUpdateModal()">나중에</button>
+    <button class="btn btn-sm" onclick="exitApp()">앱 종료</button>
   </div>
 </div>
 </div>
@@ -652,10 +647,11 @@ function showView(v) {
 }
 
 // --- APP UPDATE (GitHub Releases sideload distribution) ---
-// No Play Store => no system in-app update. On launch and from Mypage we poll the
-// GitHub "latest release" API; when the tag is newer than the installed versionName
-// we offer to download the APK through the native Updater plugin and hand it to the
-// Android package installer (REQUEST_INSTALL_PACKAGES).
+// No Play Store => no system in-app update. On launch we poll the GitHub "latest
+// release" API; when the tag is newer than the installed versionName we show a
+// blocking modal offering only "update" or "exit app" — the user cannot bypass it
+// without one of those. The APK is downloaded through the native Updater plugin and
+// handed to the Android package installer (REQUEST_INSTALL_PACKAGES).
 const GH_REPO = "kimmaze027/Settlement";
 const APK_URL = "https://github.com/" + GH_REPO + "/releases/latest/download/settlement.apk";
 let appVersion = "0";
@@ -669,8 +665,6 @@ async function getAppVersion() {
       if (r && r.version) appVersion = r.version;
     }
   } catch {}
-  const el = document.getElementById("app-ver");
-  if (el) el.textContent = "v" + appVersion;
   return appVersion;
 }
 
@@ -688,26 +682,15 @@ function cmpVer(a, b) {
   return 0;
 }
 
-async function checkForUpdate(opts) {
-  opts = opts || {};
+async function checkForUpdate() {
   await getAppVersion();
-  const noteEl = document.getElementById("upd-msg");
-  if (noteEl) noteEl.innerHTML = "";
   try {
     const r = await fetch("https://api.github.com/repos/" + GH_REPO + "/releases/latest", { cache: "no-store" });
-    if (!r.ok) { if (opts.manual) alert("업데이트 확인에 실패했습니다."); return; }
+    if (!r.ok) return;
     const d = await r.json();
     try { await pref.set("upd_lastcheck", String(Date.now())); } catch {}
-    const latest = d.tag_name || "";
-    if (cmpVer(latest, appVersion) > 0) {
-      openUpdateModal(latest, d.body || "");
-    } else {
-      if (opts.manual) alert("최신 버전입니다. (v" + appVersion + ")");
-      if (noteEl) noteEl.innerHTML = '<p class="ok">최신 버전입니다.</p>';
-    }
-  } catch {
-    if (opts.manual) alert("업데이트 확인에 실패했습니다. (네트워크)");
-  }
+    if (cmpVer(d.tag_name || "", appVersion) > 0) openUpdateModal(d.tag_name || "");
+  } catch {}
 }
 
 // Automatic check is throttled to once per 6h so repeated app opens don't hammer the
@@ -721,9 +704,9 @@ async function maybeAutoCheck() {
   checkForUpdate();
 }
 
-function openUpdateModal(tag, notes) {
+function openUpdateModal(tag) {
+  document.getElementById("upd-cur").textContent = "v" + appVersion;
   document.getElementById("upd-ver").textContent = tag;
-  document.getElementById("upd-notes").textContent = (notes || "").trim();
   document.getElementById("upd-progress").classList.add("hidden");
   document.getElementById("upd-pct").style.width = "0%";
   document.getElementById("upd-pct-text").textContent = "";
@@ -760,6 +743,10 @@ async function startUpdate() {
     document.getElementById("upd-progress").classList.add("hidden");
     alert("다운로드 실패: " + (e && e.message ? e.message : e));
   }
+}
+
+async function exitApp() {
+  try { await Capacitor.Plugins.Updater.exitApp(); } catch {}
 }
 
 // --- START ---
