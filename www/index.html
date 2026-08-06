@@ -105,6 +105,14 @@ label.cb input{width:20px;height:20px;accent-color:var(--accent)}
 
 /* ===== Push toast ===== */
 .push-toast{position:fixed;top:0;left:0;right:0;max-width:500px;margin:0 auto;background:var(--accent);color:#0C0C0C;padding:12px 16px;font-size:13px;font-weight:600;z-index:999;cursor:pointer}
+/* ===== Update modal (self-update) ===== */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;padding:var(--s-4);z-index:1000}
+.modal-card{background:var(--surface);border:1px solid var(--line-strong);border-radius:var(--r-md);padding:var(--s-5);width:100%;max-width:340px;display:flex;flex-direction:column;gap:var(--s-2)}
+.upd-ver{font-size:18px;font-weight:600;color:var(--accent-2)}
+.upd-notes{font-size:12px;color:var(--txt-mute);white-space:pre-wrap;max-height:160px;overflow:auto;line-height:1.5;margin:0}
+.upd-progress{display:flex;flex-direction:column;gap:var(--s-1);margin-top:var(--s-1)}
+.upd-bar{height:6px;background:var(--surface-2);border-radius:999px;overflow:hidden}
+.upd-fill{height:100%;width:0;background:var(--accent);border-radius:999px;transition:width .2s}
 </style>
 </head>
 <body>
@@ -216,6 +224,13 @@ label.cb input{width:20px;height:20px;accent-color:var(--accent)}
         <div id="name-msg"></div>
       </div>
     </div>
+    <div class="card stack-sm mt4">
+      <div class="row">
+        <div class="stack-sm"><span class="sub">앱 버전</span><span class="name-val" id="app-ver">-</span></div>
+        <button class="btn btn-sm" onclick="checkForUpdate({manual:true})">업데이트 확인</button>
+      </div>
+      <div id="upd-msg"></div>
+    </div>
     <button class="btn btn-block mt4" onclick="logout()">로그아웃</button>
   </div>
 
@@ -223,6 +238,20 @@ label.cb input{width:20px;height:20px;accent-color:var(--accent)}
   <div class="nav">
     <button id="tab-groups" class="active" onclick="showView('groups')">그룹</button>
     <button id="tab-mypage" onclick="showView('mypage')">내 정보</button>
+  </div>
+</div>
+<!-- UPDATE MODAL (self-update via GitHub Releases) -->
+<div id="upd-modal" class="hidden overlay">
+  <div class="modal-card">
+    <h2 class="h2 center">새 버전이 있습니다</h2>
+    <p class="center"><span id="upd-ver" class="upd-ver"></span></p>
+    <p id="upd-notes" class="upd-notes"></p>
+    <div id="upd-progress" class="upd-progress hidden">
+      <div class="upd-bar"><div id="upd-pct" class="upd-fill"></div></div>
+      <span id="upd-pct-text" class="sub center"></span>
+    </div>
+    <button id="upd-btn" class="btn btn-primary btn-block" onclick="startUpdate()">업데이트</button>
+    <button class="btn btn-sm" onclick="closeUpdateModal()">나중에</button>
   </div>
 </div>
 </div>
@@ -622,12 +651,125 @@ function showView(v) {
   if (v === "groups") loadGroups();
 }
 
+// --- APP UPDATE (GitHub Releases sideload distribution) ---
+// No Play Store => no system in-app update. On launch and from Mypage we poll the
+// GitHub "latest release" API; when the tag is newer than the installed versionName
+// we offer to download the APK through the native Updater plugin and hand it to the
+// Android package installer (REQUEST_INSTALL_PACKAGES).
+const GH_REPO = "kimmaze027/Settlement";
+const APK_URL = "https://github.com/" + GH_REPO + "/releases/latest/download/settlement.apk";
+let appVersion = "0";
+let updProgressWired = false;
+
+async function getAppVersion() {
+  try {
+    const Updater = Capacitor.Plugins.Updater;
+    if (Updater && Updater.getVersion) {
+      const r = await Updater.getVersion();
+      if (r && r.version) appVersion = r.version;
+    }
+  } catch {}
+  const el = document.getElementById("app-ver");
+  if (el) el.textContent = "v" + appVersion;
+  return appVersion;
+}
+
+// 1 if a>b, -1 if a<b, 0 equal — compares dotted numeric versions, ignoring a leading "v".
+function cmpVer(a, b) {
+  const pa = String(a).replace(/^v/, "").split(".");
+  const pb = String(b).replace(/^v/, "").split(".");
+  const n = Math.max(pa.length, pb.length);
+  for (let i = 0; i < n; i++) {
+    const x = parseInt(pa[i]) || 0;
+    const y = parseInt(pb[i]) || 0;
+    if (x > y) return 1;
+    if (x < y) return -1;
+  }
+  return 0;
+}
+
+async function checkForUpdate(opts) {
+  opts = opts || {};
+  await getAppVersion();
+  const noteEl = document.getElementById("upd-msg");
+  if (noteEl) noteEl.innerHTML = "";
+  try {
+    const r = await fetch("https://api.github.com/repos/" + GH_REPO + "/releases/latest", { cache: "no-store" });
+    if (!r.ok) { if (opts.manual) alert("업데이트 확인에 실패했습니다."); return; }
+    const d = await r.json();
+    try { await pref.set("upd_lastcheck", String(Date.now())); } catch {}
+    const latest = d.tag_name || "";
+    if (cmpVer(latest, appVersion) > 0) {
+      openUpdateModal(latest, d.body || "");
+    } else {
+      if (opts.manual) alert("최신 버전입니다. (v" + appVersion + ")");
+      if (noteEl) noteEl.innerHTML = '<p class="ok">최신 버전입니다.</p>';
+    }
+  } catch {
+    if (opts.manual) alert("업데이트 확인에 실패했습니다. (네트워크)");
+  }
+}
+
+// Automatic check is throttled to once per 6h so repeated app opens don't hammer the
+// unauthenticated GitHub API (60 req/hour/IP). The timestamp is only written on a
+// successful response, so an offline launch still retries next time.
+async function maybeAutoCheck() {
+  try {
+    const last = await pref.get("upd_lastcheck");
+    if (last && Date.now() - parseInt(last) < 6 * 3600 * 1000) return;
+  } catch {}
+  checkForUpdate();
+}
+
+function openUpdateModal(tag, notes) {
+  document.getElementById("upd-ver").textContent = tag;
+  document.getElementById("upd-notes").textContent = (notes || "").trim();
+  document.getElementById("upd-progress").classList.add("hidden");
+  document.getElementById("upd-pct").style.width = "0%";
+  document.getElementById("upd-pct-text").textContent = "";
+  const btn = document.getElementById("upd-btn");
+  btn.disabled = false;
+  btn.textContent = "업데이트";
+  document.getElementById("upd-modal").classList.remove("hidden");
+}
+function closeUpdateModal() { document.getElementById("upd-modal").classList.add("hidden"); }
+
+async function startUpdate() {
+  const Updater = Capacitor.Plugins.Updater;
+  if (!Updater || !Updater.downloadAndInstall) { alert("이 환경에서는 지원되지 않습니다."); return; }
+  const btn = document.getElementById("upd-btn");
+  btn.disabled = true;
+  btn.textContent = "다운로드 중…";
+  document.getElementById("upd-progress").classList.remove("hidden");
+  if (!updProgressWired) {
+    Updater.addListener("updateProgress", (p) => {
+      const pct = (p && p.percent) || 0;
+      document.getElementById("upd-pct").style.width = pct + "%";
+      document.getElementById("upd-pct-text").textContent = pct + "%";
+    });
+    updProgressWired = true;
+  }
+  try {
+    await Updater.downloadAndInstall({ url: APK_URL });
+    // Android's package installer is now foregrounded; close the modal so the user
+    // doesn't return to a stale overlay after installing.
+    closeUpdateModal();
+  } catch (e) {
+    btn.disabled = false;
+    btn.textContent = "업데이트";
+    document.getElementById("upd-progress").classList.add("hidden");
+    alert("다운로드 실패: " + (e && e.message ? e.message : e));
+  }
+}
+
 // --- START ---
 (async () => {
   // If a previous Google login was interrupted by the OS killing the app while the
   // account picker was open, finish it silently before showing the login screen.
   const recovered = await recoverGoogleLogin();
   if (!recovered) await init();
+  // Non-blocking: prompt to self-update when a newer GitHub release exists.
+  maybeAutoCheck();
 })();
 </script>
 </body>
