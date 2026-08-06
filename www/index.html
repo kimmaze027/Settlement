@@ -120,11 +120,7 @@ label.cb input{width:20px;height:20px;accent-color:var(--accent)}
 <!-- LOGIN SCREEN -->
 <div id="screen-login" class="screen-center">
   <h1 class="brand center">Settlement</h1>
-  <div id="login-err" class="mt2"></div>
-  <input id="li-user" class="input field" placeholder="아이디">
-  <input id="li-pass" class="input field" type="password" placeholder="비밀번호">
-  <button id="li-btn" class="btn btn-primary btn-block">로그인</button>
-  <button id="google-btn" class="btn btn-block mt3" onclick="googleLogin()">Google 로그인</button>
+  <button id="google-btn" class="btn btn-primary btn-block mt4" onclick="googleLogin()">Google 로그인</button>
   <div id="google-err" class="err center mt2"></div>
 </div>
 
@@ -264,18 +260,6 @@ async function api(path, opts = {}) {
 const won = n => "₩" + (n || 0).toLocaleString();
 const esc = s => (s || "").replace(/</g, "&lt;");
 
-// --- LOGIN ---
-document.getElementById("li-btn").onclick = async () => {
-  const u = document.getElementById("li-user").value.trim();
-  const p = document.getElementById("li-pass").value;
-  const e = document.getElementById("login-err");
-  e.innerHTML = "";
-  if (!u || !p) { e.innerHTML = '<p class="err">아이디/비밀번호 입력</p>'; return; }
-  try {
-    await api("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username: u, password: p }) });
-    await init();
-  } catch { e.innerHTML = '<p class="err">로그인 실패</p>'; }
-};
 // --- GOOGLE NATIVE LOGIN ---
 // Why this is non-trivial: GoogleAuth.signIn() opens a separate system Activity
 // (account picker). While it is foregrounded the app is backgrounded and Android
