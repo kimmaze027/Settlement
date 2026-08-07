@@ -10,19 +10,24 @@
 <style>
 /* ===== Design tokens (4px-base spacing scale; all paddings/margins/gaps use it) ===== */
 :root{
-  --bg:#09090b;
-  --surface:#18181b;
-  --surface-2:#27272a;
-  --line:#27272a;
-  --line-strong:#3f3f46;
+  --bg:#0a0a0a;
+  --surface:#0f0f0f;
+  --surface-2:#1a1a1a;
+  --popover:#121212;
+  --secondary:#1f1f1f;
+  --line:#242424;
+  --line-strong:#333333;
   --txt:#fafafa;
-  --txt-mute:#a1a1aa;
-  --txt-faint:#71717a;
+  --txt-mute:#8c8c8c;
+  --txt-faint:#666666;
+  --primary:#fafafa;
+  --primary-fg:#171717;
   --accent:#10b981;
   --accent-2:#34d399;
   --danger:#f87171;
+  --danger-strong:#dc2626;
   --s-1:4px; --s-2:8px; --s-3:12px; --s-4:16px; --s-5:20px; --s-6:24px; --s-7:28px; --s-8:32px;
-  --r-sm:8px; --r-md:12px; --r-pill:999px;
+  --r-sm:6px; --r-md:8px; --r-lg:10px; --r-pill:999px;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%}
@@ -84,8 +89,8 @@ a{color:var(--accent-2);text-decoration:none}
 .btn:hover{background:rgba(255,255,255,.06)}
 .btn:active{transform:translateY(.5px)}
 .btn:disabled{opacity:.4;cursor:not-allowed}
-.btn-primary{background:var(--accent);border-color:var(--accent);color:#09090b;font-weight:600}
-.btn-primary:hover{background:var(--accent-2);border-color:var(--accent-2)}
+.btn-primary{background:var(--primary);border-color:var(--primary);color:var(--primary-fg);font-weight:600}
+.btn-primary:hover{background:#e5e5e5;border-color:#e5e5e5}
 .btn-sm{padding:var(--s-2) var(--s-3);font-size:12px;border-radius:var(--r-sm)}
 .btn-block{display:flex;width:100%}
 .btn.neg{color:var(--danger)}
@@ -134,6 +139,106 @@ label.cb input{width:20px;height:20px;accent-color:var(--accent)}
 .keypad .key.key-blank{border:none;background:none;cursor:default}
 .actions-center{display:flex;gap:var(--s-2);justify-content:center;flex-wrap:wrap}
 .lock-link{background:none;border:none;color:var(--txt-faint);font-size:12px;cursor:pointer;padding:var(--s-2);text-decoration:underline}
+
+/* ===== Grayscale helpers ===== */
+.btn-secondary{background:var(--secondary);border-color:var(--secondary);color:var(--txt)}
+.btn-secondary:hover{background:#2a2a2a;border-color:#2a2a2a}
+.btn-icon{padding:var(--s-2);width:34px;height:34px;border-color:transparent;background:transparent;flex:none}
+.btn-icon svg{width:17px;height:17px}
+.btn-danger-ghost{color:var(--danger);border-color:transparent;background:transparent}
+.btn-danger-ghost:hover{background:rgba(220,38,38,.12)}
+.muted{color:var(--txt-mute)}
+.emerald{color:var(--accent-2)}
+.text-danger{color:var(--danger)}
+.grow{flex:1;min-width:0}
+.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wrap{flex-wrap:wrap}
+.gap-1{gap:var(--s-1)}.gap-2{gap:var(--s-2)}.gap-3{gap:var(--s-3)}
+.mt1{margin-top:var(--s-1)}
+.icon-sm{width:14px;height:14px;flex:none}
+.icon-xs{width:12px;height:12px;flex:none}
+.center{text-align:center}
+.tabnum{font-variant-numeric:tabular-nums}
+
+/* ===== Card title ===== */
+.card-title{display:flex;align-items:center;gap:var(--s-2);font-size:14px;font-weight:600;margin-bottom:var(--s-3)}
+
+/* ===== Badge variants ===== */
+.badge-success{background:rgba(16,185,129,.15);color:var(--accent-2)}
+.badge-warning{background:rgba(220,38,38,.15);color:var(--danger)}
+.badge-outline{background:transparent;border:1px solid var(--line-strong);color:var(--txt-mute)}
+.badge svg{width:11px;height:11px;vertical-align:-1px;margin-right:2px}
+
+/* ===== Member rows ===== */
+.mem{display:flex;align-items:center;gap:var(--s-3);padding:var(--s-3) 0;border-top:1px solid var(--line)}
+.mem:first-child{border-top:none}
+.avatar{width:32px;height:32px;flex:none;border-radius:50%;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--txt-mute)}
+
+/* ===== Invite code ===== */
+.code{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-sm);padding:var(--s-2) var(--s-3);font-size:11px;color:var(--txt-mute);font-family:ui-monospace,monospace}
+
+/* ===== Balance stat cards ===== */
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:var(--s-3)}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:var(--s-4)}
+.stat.wide{grid-column:1 / -1}
+.stat-lbl{display:flex;align-items:center;gap:var(--s-1);font-size:11px;color:var(--txt-mute)}
+.stat-val{display:block;margin-top:var(--s-2);font-size:22px;font-weight:600}
+.stat-pos{border-color:rgba(16,185,129,.2);background:rgba(16,185,129,.04)}
+.stat-pos .stat-val{color:var(--accent-2)}
+.stat-neg{border-color:rgba(220,38,38,.2);background:rgba(220,38,38,.04)}
+.stat-neg .stat-val{color:var(--danger)}
+.toglink{display:inline-flex;align-items:center;gap:var(--s-1);background:none;border:none;color:var(--txt-mute);font-size:12px;cursor:pointer;padding:var(--s-2) 0}
+.toglink svg{width:14px;height:14px;transition:transform .15s}
+.toglink.open svg{transform:rotate(180deg)}
+
+/* ===== Settlement list card ===== */
+.stl-card{cursor:pointer;transition:border-color .15s,background .15s}
+.stl-card:hover{border-color:rgba(255,255,255,.2);background:rgba(255,255,255,.02)}
+.stl-top{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--s-3)}
+.recv-link{display:inline-flex;align-items:center;gap:var(--s-1);color:var(--accent-2);font-size:12px}
+
+/* ===== Segmented / split ===== */
+.seg-btn{flex:1}
+.split-box{display:flex;flex-direction:column;gap:var(--s-3);background:rgba(255,255,255,.02);border:1px solid var(--line);border-radius:var(--r-md);padding:var(--s-3)}
+.split-row{display:flex;align-items:center;gap:var(--s-3);padding:2px 0}
+.split-row label{flex:1;display:flex;align-items:center;gap:var(--s-2);cursor:pointer}
+.split-amt{width:120px;text-align:right;padding:var(--s-2) var(--s-3)}
+.split-sum{display:flex;align-items:center;justify-content:space-between;font-size:12px}
+
+/* ===== Upload / select ===== */
+.upload{display:flex;align-items:center;gap:var(--s-2);border:1px dashed var(--line-strong);border-radius:var(--r-md);padding:var(--s-3);color:var(--txt-mute);cursor:pointer;font-size:13px}
+.upload:hover{color:var(--txt);border-color:rgba(255,255,255,.4)}
+.upload svg{width:16px;height:16px;flex:none}
+.select{width:100%;padding:var(--s-3) var(--s-4);background:var(--surface-2);border:1px solid var(--line-strong);border-radius:var(--r-sm);color:var(--txt);appearance:none}
+
+/* ===== Right-slide sheet ===== */
+.sheet{position:fixed;inset:0;z-index:1000;display:flex;justify-content:flex-end;background:rgba(0,0,0,.6);opacity:0;pointer-events:none;transition:opacity .2s}
+.sheet.open{opacity:1;pointer-events:auto}
+.sheet-panel{width:min(100%,440px);height:100%;background:var(--surface);border-left:1px solid var(--line-strong);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s ease;padding-top:env(safe-area-inset-top)}
+.sheet.open .sheet-panel{transform:translateX(0)}
+.sheet-head{padding:var(--s-5);border-bottom:1px solid var(--line);display:flex;align-items:flex-start;justify-content:space-between;gap:var(--s-3)}
+.sheet-title{font-size:17px;font-weight:600}
+.sheet-desc{display:flex;align-items:center;gap:var(--s-1);color:var(--txt-faint);font-size:12px;margin-top:2px}
+.sheet-close{background:none;border:none;color:var(--txt-mute);font-size:20px;cursor:pointer;line-height:1;padding:0 var(--s-1)}
+.sheet-body{flex:1;overflow-y:auto;padding:var(--s-5);display:flex;flex-direction:column;gap:var(--s-6);padding-bottom:calc(var(--s-6) + env(safe-area-inset-bottom))}
+
+/* ===== Progress / detail ===== */
+.prog{height:6px;border-radius:var(--r-pill);background:var(--line);overflow:hidden}
+.prog-fill{height:100%;border-radius:var(--r-pill);background:var(--accent)}
+.prog-fill.part{background:rgba(16,185,129,.6)}
+.dsplit{display:flex;flex-direction:column;gap:var(--s-2);border:1px solid var(--line);background:rgba(255,255,255,.02);border-radius:var(--r-md);padding:var(--s-3)}
+.receipt-img{max-height:280px;width:100%;object-fit:contain;border:1px solid var(--line);border-radius:var(--r-md);background:rgba(255,255,255,.02)}
+
+/* ===== History rows ===== */
+.hrow{display:flex;align-items:center;gap:var(--s-3);padding:var(--s-2) 0}
+.hicon{width:36px;height:36px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.hicon svg{width:16px;height:16px}
+.hicon.in{background:rgba(16,185,129,.15);color:var(--accent-2)}
+.hicon.out{background:rgba(220,38,38,.15);color:var(--danger)}
+.hday{font-size:12px;color:var(--txt-mute);font-weight:500;margin-bottom:var(--s-1)}
+
+/* ===== Modal scroll ===== */
+.modal-scroll{max-height:82vh;overflow-y:auto}
 </style>
 </head>
 <body>
@@ -174,7 +279,10 @@ label.cb input{width:20px;height:20px;accent-color:var(--accent)}
   <div id="view-groups">
     <div class="head-bar">
       <h1 class="h1">그룹</h1>
-      <button class="btn btn-sm" onclick="toggleCreate()">+ 그룹 만들기</button>
+      <div class="row gap-2">
+        <button class="btn btn-sm" onclick="promptJoin()">참여</button>
+        <button class="btn btn-primary btn-sm" onclick="toggleCreate()">+ 그룹 만들기</button>
+      </div>
     </div>
     <div id="create-form" class="card hidden stack-sm">
       <input id="gp-name" class="input" placeholder="그룹 이름">
@@ -186,65 +294,49 @@ label.cb input{width:20px;height:20px;accent-color:var(--accent)}
   <!-- GROUP DETAIL -->
   <div id="view-detail" class="hidden page-pad">
     <div class="back-row">
-      <button class="btn btn-sm" onclick="showGroups()">← 뒤로</button>
+      <button class="btn btn-sm" onclick="showGroups()">← 목록으로</button>
     </div>
-    <h1 class="h1" id="detail-name"></h1>
-    <div class="sub" id="detail-members"></div>
+    <div class="row" style="align-items:flex-start">
+      <div class="grow">
+        <h1 class="h1 truncate" id="detail-name"></h1>
+        <div class="sub" id="detail-created" style="margin-top:2px"></div>
+      </div>
+      <button id="detail-del" class="btn btn-icon btn-danger-ghost" style="display:none" aria-label="그룹 삭제" onclick="deleteGroup()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      </button>
+    </div>
     <div class="sep"></div>
-    <!-- SETTLEMENT -->
-    <div class="section-head">
-      <h2 class="h2">정산</h2>
-      <div class="row">
-        <button class="btn btn-sm" id="btn-deposit" onclick="openDeposit()" style="display:none">입금 확인</button>
-        <button class="btn btn-sm" onclick="toggleSettlementForm()">+ 정산 요청</button>
-      </div>
-    </div>
-    <!-- deposit modal -->
-    <div id="deposit-modal" class="hidden overlay" onclick="closeDeposit()">
-      <div class="modal-card stack modal-wide" onclick="event.stopPropagation()">
-        <div class="row"><span class="stl-title">입금 확인</span><span class="sub" onclick="closeDeposit()">✕</span></div>
-        <div id="deposit-debtors"></div>
-        <span class="sub" id="deposit-hint" style="display:none"></span>
-        <input id="deposit-amount" class="input" placeholder="받은 금액 (원)" inputmode="numeric" oninput="this.value=this.value.replace(/[^\d]/g,'').replace(/\B(?=(\d{3})+(?!\d))/g,',')">
-        <div id="deposit-err" class="err"></div>
-        <div class="actions"><button class="btn btn-primary" id="deposit-submit" onclick="submitDeposit()">확인</button><button class="btn" onclick="closeDeposit()">취소</button></div>
-      </div>
-    </div>
-    <!-- balance -->
+
+    <!-- Invite -->
     <div class="card">
-      <div class="row clickable" onclick="toggleDetails()">
-        <div class="stack-sm"><span class="sub">받을 금액 ▾</span><span class="amt pos" id="bal-to"></span></div>
-        <div class="stack-sm"><span class="sub">보낼 금액 ▾</span><span class="amt neg" id="bal-by"></span></div>
-        <div class="stack-sm"><span class="sub">합계</span><span class="badge" id="bal-net"></span></div>
-      </div>
-      <div id="bal-details" class="hidden stack details"></div>
-    </div>
-    <!-- create form -->
-    <div id="stl-form" class="card hidden stack">
-      <input id="stl-total" class="input" placeholder="전체 금액 (원)" oninput="fmtTotal()">
-      <input id="stl-merchant" class="input" placeholder="사용처">
-      <input id="stl-reason" class="input" placeholder="사유">
-      <div class="form-row"><span class="field-label">대상</span>
-        <div class="seg">
-          <button class="btn btn-sm" id="mode-all" onclick="setMode('all')">전체</button>
-          <button class="btn btn-sm" id="mode-sel" onclick="setMode('selected')">선택</button>
-        </div>
-      </div>
-      <div class="form-row"><span class="field-label">분할</span>
-        <div class="seg">
-          <button class="btn btn-sm" id="split-eq" onclick="setSplit('equal')">균등</button>
-          <button class="btn btn-sm" id="split-cu" onclick="setSplit('custom')">개별</button>
-        </div>
-      </div>
-      <div id="member-list"></div>
-      <div id="stl-err" class="err"></div>
-      <div class="actions">
-        <button class="btn btn-primary btn-sm" onclick="submitSettlement()">요청</button>
-        <button class="btn btn-sm" onclick="toggleSettlementForm()">취소</button>
+      <div class="card-title"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><path d="M8 12h8"/></svg> 초대 링크</div>
+      <button class="btn btn-primary btn-sm self-start" id="invite-btn" onclick="createInvite()">초대 링크 생성</button>
+      <div id="invite-msg" class="mt1"></div>
+      <div id="invite-box" class="hidden stack-sm mt3">
+        <code class="code" id="invite-url"></code>
+        <button class="btn btn-sm self-start" id="invite-copy" onclick="copyInvite()">링크 복사</button>
       </div>
     </div>
-    <!-- list -->
-    <div id="stl-list" class="mt3"></div>
+
+    <!-- Members -->
+    <div class="card">
+      <div class="card-title"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> <span id="mem-count">멤버</span></div>
+      <div id="member-list-detail"></div>
+    </div>
+
+    <!-- SETTLEMENT SECTION (feature-gated) -->
+    <div id="stl-section">
+      <div class="section-head">
+        <h2 class="h1" style="font-size:18px">정산</h2>
+        <div class="row gap-2 wrap">
+          <button class="btn btn-sm btn-secondary" id="btn-deposit" onclick="openDeposit()" style="display:none">입금 확인</button>
+          <button class="btn btn-sm" onclick="openHistory()"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg> 내역</button>
+          <button class="btn btn-sm" onclick="openForm()"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg> 정산 요청</button>
+        </div>
+      </div>
+      <div id="bal-wrap" class="mb3"></div>
+      <div id="stl-list" class="stack"></div>
+    </div>
   </div>
 
   <!-- MYPAGE -->
@@ -289,6 +381,60 @@ label.cb input{width:20px;height:20px;accent-color:var(--accent)}
     </button>
   </div>
 </div>
+
+<!-- SETTLEMENT FORM MODAL -->
+<div id="form-modal" class="hidden overlay" onclick="closeForm()">
+  <div class="modal-card modal-wide modal-scroll stack tabnum" onclick="event.stopPropagation()">
+    <div class="row"><span class="sheet-title" id="form-title">정산 요청</span><button class="sheet-close" onclick="closeForm()">✕</button></div>
+    <span class="sub">함께 쓴 금액과 나눌 대상을 입력하세요.</span>
+    <div id="form-err" class="err" role="alert"></div>
+    <div class="stack-sm"><label class="field-label" for="sf-total">전체금액 (원)</label><input id="sf-total" class="input" inputmode="numeric" placeholder="금액 입력" oninput="onTotalInput()"></div>
+    <div class="stack-sm"><label class="field-label" for="sf-merchant">사용처</label><input id="sf-merchant" class="input" placeholder="예: 마트"></div>
+    <div class="stack-sm"><label class="field-label" for="sf-reason">사유</label><input id="sf-reason" class="input" placeholder="사유 (선택)"></div>
+    <div class="stack-sm"><span class="field-label">청구 대상</span>
+      <div class="seg"><button class="btn btn-sm seg-btn" id="mode-all" onclick="setMode('all')">전체 멤버</button><button class="btn btn-sm seg-btn" id="mode-sel" onclick="setMode('selected')">선택 멤버</button></div>
+    </div>
+    <div id="split-wrap" class="split-box hidden">
+      <div class="row"><span class="field-label">분할 방식</span><button id="fill-eq" class="toglink hidden emerald" onclick="fillEqual()">균등하게 채우기</button></div>
+      <div class="seg"><button class="btn btn-sm seg-btn" id="split-eq" onclick="setSplit('equal')">균등</button><button class="btn btn-sm seg-btn" id="split-cu" onclick="setSplit('custom')">개별</button></div>
+      <span class="sub" id="split-hint"></span>
+      <div id="split-rows"></div>
+      <div id="split-sum" class="split-sum hidden"><span class="muted">합계</span><span id="split-sum-val"></span></div>
+    </div>
+    <div class="stack-sm"><span class="field-label">영수증 (선택)</span>
+      <label class="upload"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg><span id="receipt-name" class="truncate grow">이미지 또는 PDF 첨부 (최대 2MB)</span><input type="file" id="sf-receipt" accept="image/*,application/pdf" hidden onchange="onReceiptPick()"></label>
+      <button id="receipt-clear" class="toglink hidden text-danger self-start" onclick="clearReceipt()">영수증 제거</button>
+    </div>
+    <div class="actions"><button class="btn" onclick="closeForm()">취소</button><button class="btn btn-primary" id="form-submit" onclick="submitForm()">요청</button></div>
+  </div>
+</div>
+
+<!-- DEPOSIT MODAL -->
+<div id="deposit-modal" class="hidden overlay" onclick="closeDeposit()">
+  <div class="modal-card modal-wide stack" onclick="event.stopPropagation()">
+    <div class="row"><span class="sheet-title">입금 확인</span><button class="sheet-close" onclick="closeDeposit()">✕</button></div>
+    <span class="sub">받은 금액을 입력하면 해당 멤버의 미납금에서 FIFO 차감됩니다.</span>
+    <div id="deposit-body" class="stack"></div>
+    <div id="deposit-err" class="err" role="alert"></div>
+    <div class="actions"><button class="btn" onclick="closeDeposit()">취소</button><button class="btn btn-primary" id="deposit-submit" onclick="submitDeposit()">확인</button></div>
+  </div>
+</div>
+
+<!-- DETAIL SHEET -->
+<div id="detail-sheet" class="sheet" onclick="closeDetailSheet(event)">
+  <div class="sheet-panel" onclick="event.stopPropagation()">
+    <div class="sheet-head"><div class="grow"><div class="sheet-title truncate" id="ds-title"></div><div class="sheet-desc"><span id="ds-date"></span></div></div><button class="sheet-close" onclick="closeDetailSheet()">✕</button></div>
+    <div class="sheet-body tabnum" id="ds-body"></div>
+  </div>
+</div>
+
+<!-- HISTORY SHEET -->
+<div id="history-sheet" class="sheet" onclick="closeHistorySheet(event)">
+  <div class="sheet-panel" onclick="event.stopPropagation()">
+    <div class="sheet-head"><div class="grow"><div class="sheet-title">거래 내역</div><div class="sheet-desc">그룹에서 받고 보낸 입금 기록입니다.</div></div><button class="sheet-close" onclick="closeHistorySheet()">✕</button></div>
+    <div class="sheet-body tabnum" id="hs-body"></div>
+  </div>
+</div>
 <!-- UPDATE MODAL (self-update via GitHub Releases) -->
 <div id="upd-modal" class="hidden overlay">
   <div class="modal-card">
@@ -309,7 +455,9 @@ label.cb input{width:20px;height:20px;accent-color:var(--accent)}
 
 <script>
 const API = "https://api.kimmiro.com";
-let myId = null, currentGid = null, groupMembers = [], stlMode = "all", stlSplit = "equal", editingSid = null;
+let myId = null, myRole = "", myFeatures = [], currentGid = null, currentGroup = null, groupMembers = [], currentSettlements = [], currentBalance = null, currentPayments = [], inviteUrl = null;
+let fMode = "all", fSplit = "equal", fSelected = [], fCustom = {}, fEditing = null, fReceiptFile = null, fRemoveReceipt = false;
+let depSelUid = null, depDebtors = [];
 
 // --- API helpers ---
 async function api(path, opts = {}) {
@@ -317,7 +465,8 @@ async function api(path, opts = {}) {
   if (!r.ok && r.status !== 201) throw { status: r.status, ...(await r.json().catch(() => ({}))) };
   return r;
 }
-const won = n => "₩" + (n || 0).toLocaleString();
+const won = n => (n < 0 ? "−" : "") + "₩" + Math.abs(n || 0).toLocaleString();
+const fmtDate = s => { try { return new Date(s).toLocaleDateString("ko-KR"); } catch { return ""; } };
 const esc = s => (s || "").replace(/</g, "&lt;");
 
 // --- GOOGLE NATIVE LOGIN ---
@@ -425,6 +574,7 @@ async function init() {
       }
     }
     myId = d.id;
+    myRole = d.role || ""; myFeatures = d.features || [];
     document.getElementById("my-name").textContent = d.username;
     // Valid session: require a PIN (enroll on first login), then gate every reopen.
     const hash = await pref.get("pin_hash");
@@ -659,14 +809,30 @@ async function registerPush() {
   } catch {}
 }
 
+// --- SVG icons (for JS-rendered markup) ---
+const _svg = p => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+const ICON = {
+  chevron: _svg('<path d="m6 9 6 6 6-6"/>'),
+  adl: _svg('<path d="M17 7 7 17"/><path d="M17 17H7V7"/>').replace("<svg", '<svg class="icon-sm"'),
+  aur: _svg('<path d="M7 17 17 7"/><path d="M7 7h10v10"/>').replace("<svg", '<svg class="icon-sm"'),
+  crown: _svg('<path d="M2 20h20"/><path d="m3 17 2-9 4 4 3-6 3 6 4-4 2 9Z"/>'),
+  receipt: _svg('<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1Z"/><path d="M8 7h8"/><path d="M8 11h8"/>'),
+  pencil: _svg('<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>'),
+  trash: _svg('<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>'),
+};
+
+// --- feature gate: admins always pass, else needs the "settlements" feature ---
+function hasSettlements() { return myRole === "admin" || (Array.isArray(myFeatures) && myFeatures.includes("settlements")); }
+
 // --- GROUPS ---
 async function loadGroups() {
   try {
     const r = await api("/api/groups");
     const d = await r.json();
     const el = document.getElementById("group-list");
-    if (!d.groups || !d.groups.length) { el.innerHTML = '<p class="list-empty">그룹이 없습니다.</p>'; return; }
-    el.innerHTML = d.groups.map(g => `<div class="card clickable" onclick="openGroup(${g.id})"><div class="row"><span class="stl-title">${esc(g.name)}</span><span class="badge">${g.owner_id === myId ? "운영자" : "멤버"}</span></div></div>`).join("");
+    const gs = d.groups || [];
+    if (!gs.length) { el.innerHTML = '<p class="list-empty">그룹이 없습니다.</p>'; return; }
+    el.innerHTML = gs.map(g => `<div class="card stl-card" onclick="openGroup(${g.id})"><div class="row"><span class="stl-title">${esc(g.name)}</span><span class="badge">${g.owner_id === myId ? "운영자" : "멤버"}</span></div></div>`).join("");
   } catch {}
 }
 function toggleCreate() { document.getElementById("create-form").classList.toggle("hidden"); }
@@ -675,175 +841,423 @@ async function createGroup() {
   if (!n) return;
   try { await api("/api/groups", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: n }) }); document.getElementById("gp-name").value = ""; toggleCreate(); await loadGroups(); } catch {}
 }
+// Join a group by pasting an invite link or raw token (extracts the last path segment).
+async function promptJoin() {
+  const v = prompt("초대 링크 또는 코드를 붙여넣으세요");
+  if (!v) return;
+  const token = v.trim().split(/[/?#]/).filter(Boolean).pop();
+  if (!token) return;
+  try {
+    const r = await api("/api/groups/join", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token }) });
+    const d = await r.json();
+    toast("그룹에 참여했습니다");
+    if (d.group_id) openGroup(d.group_id); else await loadGroups();
+  } catch (e) { alert(e.error || "참여 실패 (유효하지 않거나 만료된 링크)"); }
+}
 
 // --- GROUP DETAIL ---
 async function openGroup(gid) {
-  currentGid = gid;
+  currentGid = gid; inviteUrl = null;
   showView("detail");
+  document.getElementById("invite-box").classList.add("hidden");
+  document.getElementById("invite-msg").innerHTML = "";
   try {
     const r = await api(`/api/groups/${gid}`);
     const d = await r.json();
+    currentGroup = d; groupMembers = d.members || [];
     document.getElementById("detail-name").textContent = d.name;
-    groupMembers = d.members || [];
-    document.getElementById("detail-members").textContent = `멤버 ${groupMembers.length}명`;
-    await loadSettlements();
-    renderMemberList();
+    document.getElementById("detail-created").textContent = "생성 " + fmtDate(d.created_at);
+    document.getElementById("detail-del").style.display = (d.owner_id === myId) ? "" : "none";
+    renderMembers();
+    const gate = hasSettlements();
+    document.getElementById("stl-section").style.display = gate ? "" : "none";
+    if (gate) await loadSettlements();
   } catch {}
 }
+function renderMembers() {
+  document.getElementById("mem-count").textContent = "멤버 · " + groupMembers.length;
+  document.getElementById("member-list-detail").innerHTML = groupMembers.map(m => {
+    const owner = m.user_id === currentGroup.owner_id;
+    return `<div class="mem"><span class="avatar">${esc((m.username || "").slice(0, 2))}</span><div class="grow row"><span class="row gap-2" style="justify-content:flex-start"><span class="name-val" style="font-size:14px">${esc(m.username)}</span>${owner ? '<span class="badge badge-success">' + ICON.crown.replace("<svg", '<svg class="icon-xs"') + 'Owner</span>' : ""}</span><span class="sub">${fmtDate(m.joined_at)}</span></div></div>`;
+  }).join("");
+}
 function showGroups() { showView("groups"); currentGid = null; }
+
+// --- INVITE ---
+async function createInvite() {
+  const msg = document.getElementById("invite-msg"); msg.innerHTML = "";
+  const btn = document.getElementById("invite-btn"); btn.disabled = true; btn.textContent = "생성 중…";
+  try {
+    const r = await api(`/api/groups/${currentGid}/invites`, { method: "POST" });
+    const d = await r.json();
+    // /groups/join lives only on settlement.kimmiro.com; build the link there.
+    inviteUrl = "https://settlement.kimmiro.com/groups/join/" + d.token;
+    document.getElementById("invite-url").textContent = inviteUrl;
+    document.getElementById("invite-box").classList.remove("hidden");
+    msg.innerHTML = '<span class="ok" role="status">초대 링크가 생성되었습니다.</span>';
+  } catch (e) { msg.innerHTML = '<span class="err">' + (e.error || "초대 링크 생성 실패") + '</span>'; }
+  finally { btn.disabled = false; btn.textContent = "초대 링크 생성"; }
+}
+async function copyInvite() {
+  if (!inviteUrl) return;
+  try { await navigator.clipboard.writeText(inviteUrl); }
+  catch {
+    const ta = document.createElement("textarea"); ta.value = inviteUrl; document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); } catch {}
+    ta.remove();
+  }
+  const b = document.getElementById("invite-copy"); b.textContent = "복사됨"; setTimeout(() => b.textContent = "링크 복사", 2000);
+}
+async function deleteGroup() {
+  if (!currentGroup) return;
+  if (!confirm(`"${currentGroup.name}" 그룹을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.`)) return;
+  try { await api(`/api/groups/${currentGid}`, { method: "DELETE" }); showGroups(); await loadGroups(); }
+  catch (e) { alert(e.error || "그룹 삭제 실패"); }
+}
 
 // --- SETTLEMENTS ---
 async function loadSettlements() {
   if (!currentGid) return;
   try {
-    const [br, lr] = await Promise.all([
+    const [br, lr, pr] = await Promise.all([
       api(`/api/groups/${currentGid}/settlements/balance`),
       api(`/api/groups/${currentGid}/settlements`),
+      api(`/api/groups/${currentGid}/settlements/payments`),
     ]);
-    const b = await br.json(), l = await lr.json();
-    document.getElementById("bal-to").textContent = won(b.owed_to_me);
-    document.getElementById("bal-by").textContent = won(b.owed_by_me);
-    const net = b.net || 0;
-    document.getElementById("bal-net").textContent = (net >= 0 ? "+" : "") + won(net);
-    // show/hide deposit button
-    document.getElementById("btn-deposit").style.display = b.owed_to_me > 0 ? "" : "none";
-    // details
-    const det = document.getElementById("bal-details");
-    let h = "";
-    if (b.breakdown?.owed_to_me?.length) { h += '<span class="sub">내가 받을 돈</span>'; b.breakdown.owed_to_me.forEach(d => h += `<div class="row"><span class="sub">${esc(d.username)}에게서</span><span class="pos">${won(d.amount)}</span></div>`); }
-    if (b.breakdown?.owed_by_me?.length) { h += '<span class="sub">내가 보낼 돈</span>'; b.breakdown.owed_by_me.forEach(d => h += `<div class="row"><span class="sub">${esc(d.username)}에게</span><span class="neg">${won(d.amount)}</span></div>`); }
-    det.innerHTML = h;
-    // list
-    const ll = document.getElementById("stl-list");
-    if (!l.settlements?.length) { ll.innerHTML = '<p class="list-empty">정산 요청이 없습니다.</p>'; return; }
-    ll.innerHTML = l.settlements.map(s => {
-      const mine = s.requester_user_id === myId;
-      return `<div class="card stack">
-        <div class="row"><span class="stl-title">${esc(s.merchant)}</span><span class="badge">${s.target_mode === "all" ? "전체" : "선택"}</span>${s.has_receipt ? '<span class="badge">영수증</span>' : ""}</div>
-        <span class="amt">${won(s.total_amount)}</span>
-        <span class="sub">${esc(s.reason)} · ${esc(s.requester_username)}${s.my_share > 0 ? ' · <span class="neg">내 몫 ' + won(s.my_share) + "</span>" : ""}</span>
-        ${mine ? `<div class="actions mt1"><button class="btn btn-sm" onclick="editSettlement(${s.id},'${esc(s.merchant)}',${s.total_amount},'${esc(s.reason)}','${s.target_mode}')">수정</button><button class="btn btn-sm neg" onclick="delSettlement(${s.id})">삭제</button></div>` : ""}
-      </div>`;
-    }).join("");
+    currentBalance = await br.json();
+    currentSettlements = (await lr.json()).settlements || [];
+    currentPayments = (await pr.json()).payments || [];
+    renderBalance();
+    renderSettlements();
   } catch {}
 }
-function toggleDetails() { document.getElementById("bal-details").classList.toggle("hidden"); }
-function toggleSettlementForm() {
-  const f = document.getElementById("stl-form");
-  f.classList.toggle("hidden");
-  if (!f.classList.contains("hidden")) { editingSid = null; ["stl-total","stl-merchant","stl-reason"].forEach(i => document.getElementById(i).value = ""); document.getElementById("stl-err").innerHTML = ""; setMode("all"); }
+function renderBalance() {
+  const b = currentBalance || { owed_to_me: 0, owed_by_me: 0, net: 0 };
+  const net = b.net || 0;
+  document.getElementById("btn-deposit").style.display = b.owed_to_me > 0 ? "" : "none";
+  const netBadge = net !== 0 ? `<span class="badge ${net > 0 ? "badge-success" : "badge-warning"}">${net > 0 ? "수익" : "부채"}</span>` : "";
+  const netStyle = net < 0 ? "color:var(--danger)" : net === 0 ? "color:var(--txt-mute)" : "";
+  let bd = "";
+  if (b.breakdown) {
+    const to = b.breakdown.owed_to_me || [], by = b.breakdown.owed_by_me || [];
+    bd = `<button class="toglink" id="bd-tog" aria-expanded="false" onclick="toggleBreakdown()">${ICON.chevron}<span id="bd-tog-txt">상세 보기</span></button>
+      <div id="bd-detail" class="hidden stats" style="margin-top:var(--s-3)">
+        <div class="stat"><span class="emerald" style="font-size:11px;font-weight:600">내가 받을 돈</span><div class="stack-sm" style="margin-top:var(--s-2)">${to.length ? to.map(d => `<div class="row"><span class="sub">${esc(d.username)}에게서</span><span class="emerald">${won(d.amount)}</span></div>`).join("") : '<span class="sub">받을 돈이 없습니다.</span>'}</div></div>
+        <div class="stat"><span class="text-danger" style="font-size:11px;font-weight:600">내가 보낼 돈</span><div class="stack-sm" style="margin-top:var(--s-2)">${by.length ? by.map(d => `<div class="row"><span class="sub">${esc(d.username)}에게</span><span class="text-danger">${won(d.amount)}</span></div>`).join("") : '<span class="sub">보낼 돈이 없습니다.</span>'}</div></div>
+      </div>`;
+  }
+  document.getElementById("bal-wrap").innerHTML = `
+    <div class="stats tabnum">
+      <div class="stat stat-pos"><span class="stat-lbl">${ICON.adl}내가 받을 금액</span><span class="stat-val">${won(b.owed_to_me)}</span></div>
+      <div class="stat stat-neg"><span class="stat-lbl">${ICON.aur}내가 보낼 금액</span><span class="stat-val">${won(b.owed_by_me)}</span></div>
+      <div class="stat wide"><span class="stat-lbl">합계 (Net)</span><span class="row" style="justify-content:flex-start;gap:var(--s-2)"><span class="stat-val" style="${netStyle}">${net > 0 ? "+" : ""}${won(net)}</span>${netBadge}</span></div>
+    </div>${bd}`;
 }
-function fmtTotal() {
-  const el = document.getElementById("stl-total");
-  const raw = el.value.replace(/[^\d]/g, "");
-  el.value = raw ? Number(raw).toLocaleString() : "";
+function toggleBreakdown() {
+  const d = document.getElementById("bd-detail"), t = document.getElementById("bd-tog"), tx = document.getElementById("bd-tog-txt");
+  const open = d.classList.toggle("hidden") === false;
+  t.classList.toggle("open", open);
+  t.setAttribute("aria-expanded", String(open));
+  tx.textContent = open ? "상세 숨기기" : "상세 보기";
 }
-function setMode(m) {
-  stlMode = m;
-  document.getElementById("mode-all").className = "btn btn-sm" + (m === "all" ? " btn-primary" : "");
-  document.getElementById("mode-sel").className = "btn btn-sm" + (m === "selected" ? " btn-primary" : "");
-  renderMemberList();
-}
-function setSplit(s) {
-  stlSplit = s;
-  document.getElementById("split-eq").className = "btn btn-sm" + (s === "equal" ? " btn-primary" : "");
-  document.getElementById("split-cu").className = "btn btn-sm" + (s === "custom" ? " btn-primary" : "");
-  renderMemberList();
-}
-function renderMemberList() {
-  const el = document.getElementById("member-list");
-  if (stlMode !== "selected") { el.innerHTML = ""; return; }
-  const total = parseInt(document.getElementById("stl-total").value.replace(/[^\d]/g, "")) || 0;
-  const checked = Array.from(el.querySelectorAll("input:checked")).map(c => parseInt(c.value));
-  el.innerHTML = groupMembers.map(m => {
-    const isC = stlMode === "selected" ? checked.includes(m.user_id) : true;
-    let amt = "";
-    if (stlSplit === "equal" && isC && checked.length) amt = `<span class="fmt">${won(Math.floor(total / checked.length))}</span>`;
-    return `<label class="cb"><input type="checkbox" value="${m.user_id}" ${isC ? "checked" : ""} onchange="renderMemberList()">${esc(m.username)} ${amt}</label>`;
+function renderSettlements() {
+  const ll = document.getElementById("stl-list");
+  if (!currentSettlements.length) { ll.innerHTML = '<div class="card"><span class="sub">정산 요청이 없습니다.</span></div>'; return; }
+  ll.innerHTML = currentSettlements.map(s => {
+    const mine = s.requester_user_id === myId;
+    const recv = s.has_receipt ? `<div class="mt1" onclick="event.stopPropagation()"><a class="recv-link" href="${API}/api/groups/${currentGid}/settlements/${s.id}/receipt" target="_blank" rel="noopener">${ICON.receipt.replace("<svg", '<svg class="icon-xs"')}영수증 보기</a></div>` : "";
+    const actions = mine ? `<div class="row gap-1" style="flex:none" onclick="event.stopPropagation()"><button class="btn btn-icon" aria-label="수정" onclick="editSettlement(${s.id})">${ICON.pencil}</button><button class="btn btn-icon btn-danger-ghost" aria-label="삭제" onclick="delSettlement(${s.id})">${ICON.trash}</button></div>` : "";
+    return `<div class="card stl-card" onclick="openDetail(${s.id})"><div class="stl-top"><div class="stack-sm grow">
+      <div class="row wrap gap-2" style="justify-content:flex-start"><span class="stl-title">${esc(s.merchant)}</span><span class="badge">${s.target_mode === "all" ? "전체 청구" : "선택 멤버"}</span>${s.has_receipt ? '<span class="badge badge-outline">' + ICON.receipt.replace("<svg", '<svg class="icon-xs"') + '영수증</span>' : ""}</div>
+      <span class="amt">${won(s.total_amount)}</span>
+      <span class="sub">${esc(s.reason)} · 청구자 ${esc(s.requester_username)}</span>
+      ${s.my_share > 0 ? `<span class="sub text-danger">내 몫: ${won(s.my_share)}</span>` : ""}
+      ${recv}
+    </div>${actions}</div></div>`;
   }).join("");
 }
-async function submitSettlement() {
-  const e = document.getElementById("stl-err"); e.innerHTML = "";
-  const total = parseInt(document.getElementById("stl-total").value.replace(/[^\d]/g, "")) || 0;
-  const merchant = document.getElementById("stl-merchant").value.trim();
-  const reason = document.getElementById("stl-reason").value.trim();
-  if (!total || !merchant) { e.innerHTML = "금액/사용처를 입력하세요"; return; }
-  const body = { total_amount: total, merchant, reason, target_mode: stlMode };
-  if (stlMode === "selected") {
-    const checked = Array.from(document.querySelectorAll("#member-list input:checked")).map(c => parseInt(c.value));
-    if (!checked.length) { e.innerHTML = "대상을 선택하세요"; return; }
-    if (stlSplit === "equal") {
-      const base = Math.floor(total / checked.length), rem = total - base * checked.length;
-      body.splits = checked.map((uid, i) => ({ user_id: uid, amount: base + (i < rem ? 1 : 0) }));
-    } else {
-      const inputs = document.querySelectorAll("#member-list input:checked");
-      body.splits = []; let sum = 0;
-      inputs.forEach(inp => {
-        const uid = parseInt(inp.value);
-        const am = parseInt(prompt(`${inp.parentElement.textContent.trim().split(/\s/)[0]}의 금액:`) || "0") || 0;
-        body.splits.push({ user_id: uid, amount: am }); sum += am;
-      });
-      if (sum !== total) { e.innerHTML = `합계 ${won(sum)} ≠ ${won(total)}`; return; }
+
+// --- SETTLEMENT FORM (create / edit) ---
+function computeEqualSplit(total, ids) {
+  const n = ids.length; if (!n) return [];
+  const base = Math.floor(total / n), rem = total - base * n;
+  return ids.map((id, i) => ({ user_id: id, amount: base + (i < rem ? 1 : 0) }));
+}
+function openForm(editing) {
+  fEditing = editing || null; fReceiptFile = null; fRemoveReceipt = false;
+  document.getElementById("form-title").textContent = fEditing ? "정산 수정" : "정산 요청";
+  document.getElementById("form-submit").textContent = fEditing ? "수정" : "요청";
+  document.getElementById("form-err").textContent = "";
+  document.getElementById("sf-receipt").value = "";
+  document.getElementById("sf-total").value = fEditing ? Number(fEditing.total_amount).toLocaleString() : "";
+  document.getElementById("sf-merchant").value = fEditing ? fEditing.merchant : "";
+  document.getElementById("sf-reason").value = fEditing ? fEditing.reason : "";
+  if (fEditing && fEditing.target_mode === "selected") {
+    fSelected = fEditing.splits.map(s => s.user_id);
+    fCustom = {}; fEditing.splits.forEach(s => fCustom[s.user_id] = String(s.amount_owed));
+    const first = fEditing.splits[0] ? fEditing.splits[0].amount_owed : 0;
+    fSplit = (fEditing.splits.length > 1 && fEditing.splits.some(s => s.amount_owed !== first)) ? "custom" : "equal";
+  } else {
+    fSelected = groupMembers.map(m => m.user_id); fCustom = {}; fSplit = "equal";
+  }
+  const hasR = fEditing && fEditing.has_receipt;
+  document.getElementById("receipt-name").textContent = hasR ? "영수증 첨부됨 · 변경하려면 선택" : "이미지 또는 PDF 첨부 (최대 2MB)";
+  const clr = document.getElementById("receipt-clear");
+  clr.classList.toggle("hidden", !hasR); clr.textContent = "영수증 제거";
+  setMode(fEditing ? fEditing.target_mode : "all");
+  document.getElementById("form-modal").classList.remove("hidden");
+}
+function closeForm() { document.getElementById("form-modal").classList.add("hidden"); }
+function fTotal() { return parseInt(document.getElementById("sf-total").value.replace(/[^\d]/g, "")) || 0; }
+function onTotalInput() {
+  const el = document.getElementById("sf-total");
+  const raw = el.value.replace(/[^\d]/g, "");
+  el.value = raw ? Number(raw).toLocaleString() : "";
+  renderSplitRows(); updateSplitSum();
+}
+function setMode(m) {
+  fMode = m;
+  document.getElementById("mode-all").className = "btn btn-sm seg-btn" + (m === "all" ? " btn-primary" : "");
+  document.getElementById("mode-sel").className = "btn btn-sm seg-btn" + (m === "selected" ? " btn-primary" : "");
+  document.getElementById("split-wrap").classList.toggle("hidden", m !== "selected");
+  if (m === "selected") setSplit(fSplit);
+}
+function setSplit(s) {
+  fSplit = s;
+  document.getElementById("split-eq").className = "btn btn-sm seg-btn" + (s === "equal" ? " btn-primary" : "");
+  document.getElementById("split-cu").className = "btn btn-sm seg-btn" + (s === "custom" ? " btn-primary" : "");
+  document.getElementById("split-hint").textContent = s === "equal" ? "선택한 인원수로 자동 n등분됩니다." : "n등분 금액이 채워집니다. 각 멤버 금액을 직접 조정하세요.";
+  document.getElementById("fill-eq").classList.toggle("hidden", s !== "custom");
+  document.getElementById("split-sum").classList.toggle("hidden", s !== "custom");
+  if (s === "custom") fillEqual();
+  renderSplitRows(); updateSplitSum();
+}
+function fillEqual() {
+  computeEqualSplit(fTotal(), fSelected).forEach(s => fCustom[s.user_id] = String(s.amount));
+  renderSplitRows(); updateSplitSum();
+}
+function toggleMember(uid, checked) {
+  if (checked) { if (!fSelected.includes(uid)) fSelected.push(uid); }
+  else { fSelected = fSelected.filter(u => u !== uid); }
+  if (fSplit === "custom") {
+    if (!checked) delete fCustom[uid];
+    else if (!fCustom[uid]) {
+      const sh = computeEqualSplit(fTotal(), fSelected).find(s => s.user_id === uid);
+      fCustom[uid] = String(sh ? sh.amount : 0);
     }
   }
+  renderSplitRows(); updateSplitSum();
+}
+function renderSplitRows() {
+  const eq = fSplit === "equal" && fSelected.length ? new Map(computeEqualSplit(fTotal(), fSelected).map(s => [s.user_id, s.amount])) : null;
+  document.getElementById("split-rows").innerHTML = groupMembers.map(m => {
+    const checked = fSelected.includes(m.user_id);
+    const amt = fSplit === "equal" && checked ? (eq ? eq.get(m.user_id) || 0 : 0) : (parseInt(fCustom[m.user_id] || "0") || 0);
+    let right = "";
+    if (checked && fSplit === "custom") right = `<input class="input split-amt" inputmode="numeric" value="${fCustom[m.user_id] ? Number(fCustom[m.user_id]).toLocaleString() : ""}" placeholder="금액" oninput="onCustomInput(${m.user_id}, this)">`;
+    else if (checked && fSplit === "equal") right = `<span class="sub">${won(amt)}</span>`;
+    return `<div class="split-row"><label><input type="checkbox" ${checked ? "checked" : ""} onchange="toggleMember(${m.user_id}, this.checked)" style="width:18px;height:18px;accent-color:var(--accent)"> ${esc(m.username)}</label>${right}</div>`;
+  }).join("");
+}
+// Update fCustom + running sum WITHOUT re-rendering rows (keeps input focus).
+function onCustomInput(uid, el) {
+  const raw = el.value.replace(/[^\d]/g, "");
+  fCustom[uid] = raw;
+  el.value = raw ? Number(raw).toLocaleString() : "";
+  updateSplitSum();
+}
+function updateSplitSum() {
+  if (fSplit !== "custom") return;
+  const sum = fSelected.reduce((a, u) => a + (parseInt(fCustom[u] || "0") || 0), 0);
+  const total = fTotal();
+  const el = document.getElementById("split-sum-val");
+  el.textContent = won(sum) + " / " + won(total);
+  el.className = sum === total ? "emerald" : "text-danger";
+  el.style.fontWeight = "500";
+}
+function onReceiptPick() {
+  const inp = document.getElementById("sf-receipt");
+  const f = inp.files && inp.files[0]; if (!f) return;
+  if (f.size > 2 * 1024 * 1024) { document.getElementById("form-err").textContent = "영수증은 2MB 이하여야 합니다"; inp.value = ""; return; }
+  document.getElementById("form-err").textContent = "";
+  fReceiptFile = f; fRemoveReceipt = false;
+  document.getElementById("receipt-name").textContent = f.name;
+  const clr = document.getElementById("receipt-clear");
+  clr.classList.remove("hidden"); clr.textContent = "선택 취소";
+  inp.value = "";
+}
+function clearReceipt() {
+  const name = document.getElementById("receipt-name"), clr = document.getElementById("receipt-clear");
+  if (fReceiptFile) {
+    fReceiptFile = null;
+    if (fEditing && fEditing.has_receipt && !fRemoveReceipt) { name.textContent = "영수증 첨부됨 · 변경하려면 선택"; clr.textContent = "영수증 제거"; }
+    else { name.textContent = "이미지 또는 PDF 첨부 (최대 2MB)"; clr.classList.add("hidden"); }
+  } else if (fEditing && fEditing.has_receipt) {
+    fRemoveReceipt = true;
+    name.textContent = "이미지 또는 PDF 첨부 (최대 2MB)";
+    clr.classList.add("hidden");
+  }
+}
+async function submitForm() {
+  const err = document.getElementById("form-err"); err.textContent = "";
+  const total = fTotal();
+  const merchant = document.getElementById("sf-merchant").value.trim();
+  const reason = document.getElementById("sf-reason").value.trim();
+  if (total <= 0) { err.textContent = "전체금액을 입력하세요"; return; }
+  if (total > 1000000000) { err.textContent = "전체금액은 10억 원 이하여야 합니다"; return; }
+  if (!merchant) { err.textContent = "사용처를 입력하세요"; return; }
+  if (merchant.length > 200) { err.textContent = "사용처는 200자 이하여야 합니다"; return; }
+  if (reason.length > 1000) { err.textContent = "사유는 1000자 이하여야 합니다"; return; }
+  const body = { total_amount: total, merchant, reason, target_mode: fMode };
+  if (fMode === "selected") {
+    if (!fSelected.length) { err.textContent = "대상 멤버를 선택하세요"; return; }
+    let splits;
+    if (fSplit === "equal") splits = computeEqualSplit(total, fSelected);
+    else {
+      splits = fSelected.map(u => ({ user_id: u, amount: parseInt(fCustom[u] || "0") || 0 }));
+      if (splits.some(s => s.amount <= 0)) { err.textContent = "멤버별 금액은 1원 이상이어야 합니다"; return; }
+      const sum = splits.reduce((a, b) => a + b.amount, 0);
+      if (sum !== total) { err.textContent = `멤버별 금액 합계(=${won(sum)})가 전체금액과 다릅니다`; return; }
+    }
+    body.splits = splits;
+  }
+  const btn = document.getElementById("form-submit"); btn.disabled = true;
   try {
-    const m = editingSid ? "PUT" : "POST";
-    const p = editingSid ? `/api/groups/${currentGid}/settlements/${editingSid}` : `/api/groups/${currentGid}/settlements`;
-    await api(p, { method: m, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-    toggleSettlementForm(); await loadSettlements();
-  } catch (err) { e.innerHTML = err.error || "실패"; }
+    const url = fEditing ? `/api/groups/${currentGid}/settlements/${fEditing.id}` : `/api/groups/${currentGid}/settlements`;
+    const r = await api(url, { method: fEditing ? "PUT" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    const saved = await r.json().catch(() => null);
+    const sid = fEditing ? fEditing.id : (saved ? saved.id : null);
+    // Attach/replace/remove the receipt against the saved id. A receipt failure is
+    // surfaced but does not roll back the settlement save.
+    if (sid != null) {
+      const rurl = `${API}/api/groups/${currentGid}/settlements/${sid}/receipt`;
+      try {
+        if (fReceiptFile) {
+          const fd = new FormData(); fd.append("file", fReceiptFile);
+          const up = await fetch(rurl, { method: "POST", credentials: "include", body: fd });
+          if (!up.ok) { const d = await up.json().catch(() => ({})); alert(d.error || "영수증 업로드 실패"); }
+        } else if (fEditing && fRemoveReceipt && fEditing.has_receipt) {
+          await fetch(rurl, { method: "DELETE", credentials: "include" });
+        }
+      } catch { alert("영수증 처리 실패"); }
+    }
+    closeForm(); await loadSettlements();
+  } catch (e) { err.textContent = e.error || "저장 실패"; }
+  finally { btn.disabled = false; }
 }
-function editSettlement(sid, merchant, total, reason, mode) {
-  editingSid = sid;
-  document.getElementById("stl-total").value = total.toLocaleString();
-  document.getElementById("stl-merchant").value = merchant;
-  document.getElementById("stl-reason").value = reason;
-  setMode(mode);
-  document.getElementById("stl-form").classList.remove("hidden");
-}
+function editSettlement(sid) { const s = currentSettlements.find(x => x.id === sid); if (s) openForm(s); }
 async function delSettlement(sid) {
-  if (!confirm("삭제할까요?")) return;
-  try { await api(`/api/groups/${currentGid}/settlements/${sid}`, { method: "DELETE" }); await loadSettlements(); } catch {}
+  if (!confirm("이 정산 요청을 삭제할까요?")) return;
+  try { await api(`/api/groups/${currentGid}/settlements/${sid}`, { method: "DELETE" }); } catch (e) { alert(e.error || "삭제 실패"); }
+  await loadSettlements();
 }
-let depositSelectedUid = null;
-async function openDeposit() {
-  const res = await api(`/api/groups/${currentGid}/settlements/balance`);
-  const b = await res.json();
-  const debtors = b.breakdown?.owed_to_me || [];
-  if (!debtors.length) { alert("받을 금액이 없습니다."); return; }
-  depositSelectedUid = debtors[0].user_id;
-  const dd = document.getElementById("deposit-debtors");
-  dd.innerHTML = '<span class="sub">받은 사람</span>' +
-    debtors.map(d => `<button class="deposit-pick" data-uid="${d.user_id}" onclick="pickDebtor(${d.user_id})">${esc(d.username)} (${won(d.amount)})</button>`).join("");
-  pickDebtor(depositSelectedUid);
-  document.getElementById("deposit-amount").value = "";
-  document.getElementById("deposit-err").innerHTML = "";
+
+// --- SETTLEMENT DETAIL DRAWER ---
+function openDetail(sid) {
+  const s = currentSettlements.find(x => x.id === sid); if (!s) return;
+  let created = "";
+  try { created = new Date(s.created_at).toLocaleString("ko-KR", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" }); } catch {}
+  document.getElementById("ds-title").textContent = s.merchant;
+  document.getElementById("ds-date").textContent = created;
+  const rurl = `${API}/api/groups/${currentGid}/settlements/${s.id}/receipt`;
+  const splits = (s.splits || []).map(sp => {
+    const rem = sp.amount_owed - sp.paid_amount, done = rem <= 0;
+    const pct = sp.amount_owed > 0 ? Math.min(100, Math.round(sp.paid_amount / sp.amount_owed * 100)) : 0;
+    const prog = sp.paid_amount > 0 ? `<div class="prog"><div class="prog-fill ${done ? "" : "part"}" style="width:${pct}%"></div></div><div class="row"><span class="sub">입금 ${won(sp.paid_amount)}</span><span class="${done ? "emerald" : "text-danger"}" style="font-size:12px">${done ? "완료" : "남음 " + won(rem)}</span></div>` : "";
+    return `<div class="dsplit"><div class="row"><span class="truncate">${esc(sp.username)}${sp.user_id === s.requester_user_id ? '<span class="sub"> · 청구자</span>' : ""}</span><span style="font-weight:500;flex:none">${won(sp.amount_owed)}</span></div>${prog}</div>`;
+  }).join("");
+  const receipt = s.has_receipt
+    ? `<a href="${rurl}" target="_blank" rel="noopener"><img class="receipt-img" src="${rurl}?t=${Date.now()}" alt="영수증 미리보기" onerror="this.outerHTML='<span class=&quot;recv-link&quot;>영수증 원본 보기 (새 창)</span>'"></a>`
+    : '<span class="sub">첨부된 영수증이 없습니다.</span>';
+  document.getElementById("ds-body").innerHTML = `
+    <div class="stack-sm"><span class="sub">전체 금액</span><span style="font-size:28px;font-weight:600">${won(s.total_amount)}</span>
+      <div class="row wrap gap-2" style="justify-content:flex-start"><span class="badge">${s.target_mode === "all" ? "전체 청구" : "선택 멤버"}</span><span class="sub">청구자 ${esc(s.requester_username)}</span></div>
+      ${s.reason ? `<span class="sub">${esc(s.reason)}</span>` : ""}
+    </div>
+    <div class="stack-sm"><span class="sub">멤버별 청구 (${(s.splits || []).length}명)</span><div class="stack">${splits}</div></div>
+    <div class="stack-sm"><span class="sub">영수증</span>${receipt}</div>`;
+  document.getElementById("detail-sheet").classList.add("open");
+}
+function closeDetailSheet(e) { if (e && e.target !== e.currentTarget) return; document.getElementById("detail-sheet").classList.remove("open"); }
+
+// --- HISTORY DRAWER ---
+function openHistory() {
+  const ps = [...currentPayments].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  const totalIn = currentPayments.filter(p => p.requester_user_id === myId).reduce((a, b) => a + b.amount, 0);
+  const totalOut = currentPayments.filter(p => p.requester_user_id !== myId).reduce((a, b) => a + b.amount, 0);
+  const dayLabel = d => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const that = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+    const diff = Math.round((today - that) / 86400000);
+    if (diff === 0) return "오늘";
+    if (diff === 1) return "어제";
+    return d.toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric", weekday: "short" });
+  };
+  const groups = [];
+  ps.forEach(p => {
+    const d = new Date(p.created_at);
+    const k = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+    const last = groups[groups.length - 1];
+    if (last && last.key === k) last.items.push(p);
+    else groups.push({ key: k, label: dayLabel(d), items: [p] });
+  });
+  const body = groups.length ? groups.map(g => `<div class="stack-sm"><span class="hday">${g.label}</span><div>${g.items.map(p => {
+    const recv = p.requester_user_id === myId;
+    const who = recv ? p.from_username : p.requester_username;
+    let time = ""; try { time = new Date(p.created_at).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" }); } catch {}
+    return `<div class="hrow"><span class="hicon ${recv ? "in" : "out"}">${recv ? ICON.adl : ICON.aur}</span><div class="grow stack-sm" style="gap:0"><span class="truncate"><b>${esc(who)}</b>${recv ? "님에게서 받음" : "님에게 보냄"}</span><span class="sub">${time}</span></div><span class="${recv ? "emerald" : "text-danger"}" style="font-weight:600;flex:none">${recv ? "+" : "−"}${won(p.amount)}</span></div>`;
+  }).join("")}</div></div>`).join("") : '<div class="center muted" style="padding:var(--s-8) 0">거래 내역이 없습니다.</div>';
+  document.getElementById("hs-body").innerHTML = `
+    <div class="stats" style="margin:0">
+      <div class="stat stat-pos"><span class="stat-lbl">${ICON.adl}받은 금액</span><span class="stat-val" style="font-size:18px">${won(totalIn)}</span></div>
+      <div class="stat stat-neg"><span class="stat-lbl">${ICON.aur}보낸 금액</span><span class="stat-val" style="font-size:18px">${won(totalOut)}</span></div>
+    </div>${body}`;
+  document.getElementById("history-sheet").classList.add("open");
+}
+function closeHistorySheet(e) { if (e && e.target !== e.currentTarget) return; document.getElementById("history-sheet").classList.remove("open"); }
+
+// --- DEPOSIT MODAL (member select + FIFO) ---
+function fmtAmt(el) { const raw = el.value.replace(/[^\d]/g, ""); el.value = raw ? Number(raw).toLocaleString() : ""; }
+function openDeposit() {
+  const raw = (currentBalance && currentBalance.breakdown && currentBalance.breakdown.owed_to_me) || [];
+  depDebtors = [...raw].sort((a, b) => b.amount - a.amount);
+  document.getElementById("deposit-err").textContent = "";
+  const body = document.getElementById("deposit-body"), submit = document.getElementById("deposit-submit");
+  if (!depDebtors.length) {
+    body.innerHTML = '<div class="center muted" style="padding:var(--s-5) 0">받을 금액이 없습니다.</div>';
+    submit.style.display = "none";
+  } else {
+    submit.style.display = "";
+    depSelUid = depDebtors[0].user_id;
+    body.innerHTML = `
+      <div class="stack-sm"><label class="field-label" for="dep-sel">받은 사람</label>
+        <select id="dep-sel" class="select" onchange="onDepSel()">${depDebtors.map(d => `<option value="${d.user_id}">${esc(d.username)} (${won(d.amount)})</option>`).join("")}</select></div>
+      <div class="row" id="dep-owe" style="background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-sm);padding:var(--s-2) var(--s-3)"></div>
+      <div class="stack-sm"><label class="field-label" for="deposit-amount">받은 금액 (원)</label>
+        <input id="deposit-amount" class="input" placeholder="금액 입력" inputmode="numeric" oninput="fmtAmt(this)"></div>`;
+    onDepSel();
+  }
   document.getElementById("deposit-modal").classList.remove("hidden");
 }
-function pickDebtor(uid) {
-  depositSelectedUid = uid;
-  document.querySelectorAll(".deposit-pick").forEach(b => {
-    const on = parseInt(b.dataset.uid) === uid;
-    b.classList.toggle("on", on);
-  });
-  const hint = document.getElementById("deposit-hint");
-  const res = document.querySelector(`.deposit-pick[data-uid="${uid}"]`);
-  if (res) { hint.textContent = res.textContent.replace(/.*\((.*)\)/, "받을 금액: $1"); hint.style.display = ""; }
+function onDepSel() {
+  depSelUid = parseInt(document.getElementById("dep-sel").value);
+  const d = depDebtors.find(x => x.user_id === depSelUid);
+  document.getElementById("dep-owe").innerHTML = d ? `<span class="sub">${esc(d.username)}의 미수금</span><span class="emerald" style="font-weight:500">${won(d.amount)}</span>` : "";
 }
 function closeDeposit() { document.getElementById("deposit-modal").classList.add("hidden"); }
 async function submitDeposit() {
-  const e = document.getElementById("deposit-err"); e.innerHTML = "";
+  const e = document.getElementById("deposit-err"); e.textContent = "";
   const amt = parseInt(document.getElementById("deposit-amount").value.replace(/[^\d]/g, "")) || 0;
-  if (!depositSelectedUid || amt <= 0) { e.innerHTML = "멤버와 금액을 입력하세요"; return; }
+  const d = depDebtors.find(x => x.user_id === depSelUid);
+  if (!depSelUid || amt <= 0) { e.textContent = "멤버와 금액을 입력하세요"; return; }
+  if (d && amt > d.amount) { e.textContent = `받은 금액은 미수금(${won(d.amount)}) 이하여야 합니다`; return; }
+  const btn = document.getElementById("deposit-submit"); btn.disabled = true;
   try {
-    const res = await api(`/api/groups/${currentGid}/settlements/payment`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ from_user_id: depositSelectedUid, amount: amt }),
-    });
-    if (!res.ok) { const d = await res.json().catch(() => ({})); e.innerHTML = d.error || "실패"; return; }
+    await api(`/api/groups/${currentGid}/settlements/payment`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ from_user_id: depSelUid, amount: amt }) });
     closeDeposit(); await loadSettlements();
-  } catch (err) { e.innerHTML = "서버 연결 실패"; }
+  } catch (err) { e.textContent = err.error || "입금 확인 실패"; }
+  finally { btn.disabled = false; }
 }
 
 // --- MYPAGE / NICKNAME ---
@@ -868,8 +1282,8 @@ async function logout() {
 
 // --- NAV ---
 function showView(v) {
-  ["groups","detail","mypage"].forEach(s => document.getElementById("view-" + s).classList.add("hidden"));
-  document.getElementById("view-" + (v === "mypage" ? "mypage" : v)).classList.remove("hidden");
+  ["groups", "detail", "mypage"].forEach(s => document.getElementById("view-" + s).classList.add("hidden"));
+  document.getElementById("view-" + v).classList.remove("hidden");
   document.querySelectorAll(".nav button").forEach(b => b.classList.remove("active"));
   document.getElementById("tab-" + (v === "detail" ? "groups" : v)).classList.add("active");
   if (v === "groups") loadGroups();
